@@ -217,10 +217,19 @@ PROTECTED_COLLOCATIONS: List[str] = [
     "telemetry constraint",
     "telemetry constraints",
     "telemetry data",
-    "gateway telemetry"
+    "gateway telemetry",
+    # STEM Equations, Theorems & Scientific Models (Protected Collocations)
+    "green's function", "green's theorem", "stokes' theorem", "gauss's theorem",
+    "reynolds number", "mach number", "prandtl number", "nusselt number",
+    "navier-stokes", "navier-stokes equations", "wave equation", "heat equation",
+    "laplace equation", "black-scholes", "differential equation", "differential equations",
+    "partial derivative", "partial derivatives", "boundary condition", "boundary conditions",
+    "initial condition", "initial conditions", "finite difference", "crank-nicolson",
+    "truncation error", "taylor series", "fourier transform", "stochastic process",
+    "neural networks", "machine learning", "deep learning", "artificial intelligence"
 ]
 
-# Sensitive technical terms that must NEVER be synonymized into colloquial words (e.g., server -> waiter)
+# Sensitive technical terms that must NEVER be synonymized into colloquial words
 PROTECTED_TECHNICAL_WORDS: Set[str] = {
     "server", "servers", "gateway", "gateways", "email", "emails",
     "spam", "ham", "classifier", "classifiers", "classification",
@@ -233,17 +242,32 @@ PROTECTED_TECHNICAL_WORDS: Set[str] = {
     "throughput", "firewall", "firewalls", "proxy", "proxies",
     "socket", "sockets", "packet", "packets", "phishing", "malware",
     "metadata", "firmware", "database", "databases",
-    "artificial", "intelligence", "neural", "network", "networks"
+    "artificial", "intelligence", "neural", "network", "networks",
+    # STEM Scientists, Theorems, Tools & Formal Nomenclature
+    "navier-stokes", "boltzmann", "maxwell", "helmholtz", "schrodinger",
+    "schrödinger", "heisenberg", "bernoulli", "lagrange", "lagrangian",
+    "hamiltonian", "jacobian", "hessian", "wronskian", "cauchy", "riemann",
+    "hilbert", "banach", "sobolev", "lebesgue", "gaussian", "bayesian",
+    "boolean", "euclidean", "cartesian", "fibonacci", "hermitian", "abelian",
+    "kolmogorov", "lyapunov", "reynolds", "prandtl", "nusselt", "markov",
+    "laplace", "fourier", "dirichlet", "neumann", "poincare", "eigenvalue",
+    "eigenvalues", "tensorflow", "pytorch", "comsol", "ansys", "openfoam",
+    "matlab", "simulink", "crispr-cas9", "biobert", "adamw", "bert",
+    "resnet-50", "squad", "black-scholes", "crank-nicolson", "functional",
+    "equation", "equations", "formula", "formulas"
 }
 
-# Obscure, archaic, or overly clinical lemmas that MUST NEVER be introduced into natural prose
+# Obscure, archaic, or broken WordNet lemmas that MUST NEVER be introduced into natural prose
 BANNED_OBSCURE_LEMMAS: Set[str] = {
-    "unreal", "holocene", "twelvemonth", "homo", "potpourri", "psychoanalysis",
+    "yesteryear", "bygone", "erstwhile", "quondam", "whilom", "observations",
+    "doings", "disc", "manipulator", "convergency", "useable", "crossways",
+    "unreal", "unusual person", "mark", "shade", "monitor lizard", "ghost", "specter",
+    "holocene", "twelvemonth", "homo", "potpourri", "psychoanalysis",
     "pivotal", "tapestry", "delve", "delves", "delving", "multifaceted", "intertwined",
-    "testament", "beacon", "plethora", "myriad", "juxtaposition",
-    "overarching", "furthermore", "moreover", "commence", "commences", "commencing",
+    "testament", "beacon", "plethora", "juxtaposition",
+    "overarching", "commence", "commences", "commencing",
     "whilst", "heretofore", "henceforth", "peradventure", "betwixt", "forthwith",
-    "ergo", "vis-a-vis", "schema", "panacea", "zeitgeist", "nexus", "linchpin",
+    "schema", "panacea", "zeitgeist", "nexus", "linchpin",
     "cornerstone", "bedrock", "behoove", "verily", "whence", "wherefore",
     "standpoint", "figure", "espouse", "espouses", "espousing", "requisite",
     "promote", "promoted", "practice", "realism", "cope", "necessity"
@@ -2396,7 +2420,20 @@ class SynonymEngine:
         if not wordnet:
             return ()
         try:
-            synsets = wordnet.synsets(w_low)
+            # Infer POS constraints from morphological suffix to eliminate grammatical breakage
+            pos_filter = None
+            req_suffix = None
+            if w_low.endswith("ly") and len(w_low) > 4:
+                pos_filter = "r"
+                req_suffix = "ly"
+            elif w_low.endswith("ing") and len(w_low) > 5:
+                pos_filter = ("v", "a", "s")
+                req_suffix = "ing"
+            elif w_low.endswith("ed") and len(w_low) > 4:
+                pos_filter = ("v", "a", "s")
+                req_suffix = "ed"
+
+            synsets = wordnet.synsets(w_low, pos=pos_filter) if pos_filter and isinstance(pos_filter, str) else wordnet.synsets(w_low)
             if not synsets:
                 return ()
 
@@ -2404,21 +2441,31 @@ class SynonymEngine:
             seen = {w_low}
             ai_buzz_set = set(AI_BUZZWORDS)
 
-            for syn in synsets[:3]:
+            for syn in synsets[:2]:
+                if pos_filter and isinstance(pos_filter, tuple) and syn.pos() not in pos_filter:
+                    continue
                 for lemma in syn.lemmas():
-                    name = lemma.name().lower().replace("_", " ")
+                    raw_lemma = lemma.name()
+                    # Skip proper nouns
+                    if raw_lemma[0].isupper():
+                        continue
+                    name = raw_lemma.lower().replace("_", " ")
+                    if req_suffix and not name.endswith(req_suffix):
+                        continue
                     if (
                         name not in seen
-                        and len(name.split()) <= 2
+                        and len(name.split()) <= 1  # Strictly 1-to-1 clean single-word swap
+                        and len(name) >= 3
                         and name not in ai_buzz_set
                         and name not in BANNED_OBSCURE_LEMMAS
+                        and name not in PROTECTED_TECHNICAL_WORDS
                         and not any(char.isdigit() for char in name)
                     ):
                         seen.add(name)
                         candidates.append(name)
-                        if len(candidates) >= 5:
+                        if len(candidates) >= 4:
                             break
-                if len(candidates) >= 5:
+                if len(candidates) >= 4:
                     break
 
             return tuple(candidates)
@@ -2524,8 +2571,8 @@ class SynonymEngine:
         new_words: List[str] = []
 
         for token in words:
-            # Check if this token contains a protected collocation or citation placeholder
-            if "__COLLOC_" in token or "__CITREF_" in token:
+            # Check if this token contains a protected collocation, citation, or LaTeX placeholder
+            if "__COLLOC_" in token or "__CITREF_" in token or "XLTXMASK" in token:
                 new_words.append(token)
                 continue
 
@@ -2543,6 +2590,7 @@ class SynonymEngine:
                 or core_lower in preserve_words
                 or core_lower in PROTECTED_TECHNICAL_WORDS
                 or any(core_lower in kw for kw in preserve)
+                or ("-" in core_lower and core_lower not in self.thesaurus)
                 or (core_lower in COMMON_FUNCTION_WORDS and core_lower not in self.thesaurus)
                 or self.protected_regex.match(core)
                 or random.random() > intensity
@@ -2558,9 +2606,6 @@ class SynonymEngine:
                     c for c in raw_cands
                     if c.lower() not in ai_buzz_set and c.lower() not in BANNED_OBSCURE_LEMMAS
                 ]
-
-            if not candidates:
-                candidates = self.get_wordnet_candidates(core_lower, tone=tone)
 
             if not candidates:
                 new_words.append(token)

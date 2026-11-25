@@ -16,7 +16,7 @@ class TestAPI(unittest.TestCase):
     def test_index_page(self):
         resp = self.app.get("/")
         self.assertEqual(resp.status_code, 200)
-        self.assertIn(b"TextHumanizer", resp.data)
+        self.assertIn(b"Turnitout", resp.data)
 
     def test_presets_api(self):
         resp = self.app.get("/api/presets")

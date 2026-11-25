@@ -371,6 +371,9 @@ def humanize_docx():
     else:
         preserve_keywords = []
 
+    zero_expansion_raw = str(request.form.get("zero_expansion", "false")).lower()
+    zero_expansion = zero_expansion_raw in ("true", "1", "yes", "on")
+
     try:
         content = file.read()
         out_stream, annotated_stream, metrics_summary = DocumentParser.humanize_docx_document(
@@ -380,7 +383,8 @@ def humanize_docx():
             intensity=intensity,
             preserve_keywords=preserve_keywords,
             annotate_changes=False,
-            return_annotated=True
+            return_annotated=True,
+            zero_expansion=zero_expansion
         )
 
         token = str(uuid.uuid4())
@@ -520,16 +524,24 @@ def humanize_text():
         intensity = 0.70
 
     preserve_keywords = data.get("preserve_keywords", [])
-
     if isinstance(preserve_keywords, str):
         preserve_keywords = [k.strip() for k in preserve_keywords.split(",") if k.strip()]
+
+    zero_expansion = bool(data.get("zero_expansion", False))
+    inject_citations = bool(data.get("inject_citations", False))
+    citation_format = data.get("citation_format", "IEEE")
+    options = data.get("options") if isinstance(data.get("options"), dict) else None
 
     result = humanizer.process(
         text=text,
         tone=tone,
         intensity=intensity,
         preserve_keywords=preserve_keywords,
-        mode=mode
+        mode=mode,
+        zero_expansion=zero_expansion,
+        inject_citations=inject_citations,
+        citation_format=citation_format,
+        options=options
     )
 
     return jsonify(result)
@@ -669,6 +681,21 @@ def api_citations_generate():
     count = int(data.get("count", 3))
 
     result = citation_engine.generate_references(discipline=discipline, count=count, text_context=text)
+    return jsonify({"success": True, **result})
+
+
+@app.route("/api/citations", methods=["POST"])
+def api_citations_inject():
+    """Injects contextual IEEE/APA/LaTeX citations directly into text + returns auto-fill BibTeX."""
+    data = request.get_json(silent=True) or {}
+    text = data.get("text", "").strip()
+    if not text:
+        return jsonify({"success": False, "error": "No text provided"}), 400
+    fmt = data.get("citation_format", "IEEE")
+    count = int(data.get("citation_count", 2))
+    discipline = data.get("discipline")
+
+    result = citation_engine.inject_citations(text=text, fmt=fmt, count=count, discipline=discipline)
     return jsonify({"success": True, **result})
 
 

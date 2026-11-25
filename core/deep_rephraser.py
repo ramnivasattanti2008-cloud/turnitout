@@ -18,9 +18,9 @@ class DeepRephraser:
     def __init__(self):
         # High-order phrase-level contextual transformations (matching colloquial, typo, and exact forms)
         self.phrase_transforms: List[Tuple[str, List[str]]] = [
-            # Temporal & Fast-Paced openers (handling missing apostrophes, typos)
+            # Temporal & Fast-Paced openers (handling missing apostrophes, typos, adjectives)
             (
-                r"\bin today(?:'s|s)? (?:fast[- ]paced|rapidly evolving|digital|modern) (?:world|era|age|landscape),?\s*",
+                r"\bin today(?:'s|s)?\s+(?:fast[- ]paced|rapidly evolving|digital|modern)\s+(?:academic|business|scientific|clinical|corporate|technological)?\s*(?:world|era|age|landscape|society),?\s*",
                 ["In contemporary practice, ", "In recent years, ", "Today, ", "Across modern fields, "]
             ),
             (
@@ -144,22 +144,23 @@ class DeepRephraser:
                 ]
             ),
 
-            # Role & Dependency clauses
-            # Role & Dependency clauses (preserving leading preambles/transitions)
+            # Role & Dependency clauses (grammatically safe without dangling noun splits)
             (
-                r"\b((?:(?:Furthermore|Moreover|Additionally|In addition|Notably|Importantly),?\s+)?(?:it is\s+(?:important|crucial|vital|imperative|essential)\s+to\s+(?:remember|note|keep in mind|recognize|acknowledge|understand|appreciate)\s+that\s+|one must\s+(?:recognize|note|admit)\s+that\s+)?)([A-Za-z0-9_\-\s]+?)\s+plays?\s+a\s+(?:(?:crucial|vital|pivotal|key|multifaceted|fundamental)\s*(?:and\s+)?)+(?:role|part)\s+in\s+modern\s+([A-Za-z0-9_\-]+)\b",
+                r"\bplays?\s+a\s+(?:(?:crucial|vital|pivotal|key|multifaceted|fundamental)\s*(?:and\s+)?)+(?:role|part)\s+in\s+modern\b",
                 [
-                    r"\1modern \3 increasingly relies on \2",
-                    r"\1\2 fundamentally shapes modern \3",
-                    r"\1\2 directly anchors modern \3"
+                    "directly underpins contemporary",
+                    "fundamentally shapes present-day",
+                    "occupies a central station in modern",
+                    "serves as an indispensable foundation for modern"
                 ]
             ),
             (
-                r"\b((?:(?:Furthermore|Moreover|Additionally|In addition|Notably|Importantly),?\s+)?(?:it is\s+(?:important|crucial|vital|imperative|essential)\s+to\s+(?:remember|note|keep in mind|recognize|acknowledge|understand|appreciate)\s+that\s+|one must\s+(?:recognize|note|admit)\s+that\s+)?)([A-Za-z0-9_\-\s]+?)\s+plays?\s+a\s+(?:(?:crucial|vital|pivotal|key|multifaceted|fundamental)\s*(?:and\s+)?)+(?:role|part)\s+in\s+([A-Za-z0-9_\-\s]+?)\b",
+                r"\bplays?\s+a\s+(?:(?:crucial|vital|pivotal|key|multifaceted|fundamental)\s*(?:and\s+)?)+(?:role|part)\s+in\b",
                 [
-                    r"\1\3 fundamentally relies on \2",
-                    r"\1\2 serves as an essential pillar of \3",
-                    r"\1\2 underpins \3"
+                    "directly underpins",
+                    "fundamentally shapes",
+                    "occupies a central position within",
+                    "serves as a primary foundation for"
                 ]
             ),
 
@@ -196,21 +197,13 @@ class DeepRephraser:
                 ]
             ),
 
-            # Testament & Innovation clauses (preserving leading preambles/transitions)
+            # Testament & Innovation clauses
             (
-                r"\b((?:(?:Furthermore|Moreover|Additionally|In addition|Notably|Importantly),?\s+)?(?:it is\s+(?:important|crucial|vital|imperative|essential)\s+to\s+(?:remember|note|keep in mind|recognize|acknowledge|understand|appreciate)\s+that\s+|one must\s+(?:recognize|note|admit)\s+that\s+)?)([A-Za-z0-9_\-\s]+?)\s+(?:stands?|serves?|acts?)\s+as\s+a\s+testament\s+to\s+(?:the\s+power\s+of\s+)?([A-Za-z0-9_\-\s]+?)\b",
+                r"\b(?:stands?|serves?|acts?)\s+as\s+a\s+testament\s+to\s+(?:the\s+power\s+of\s+)?",
                 [
-                    r"\1\2 stands as tangible proof of \3",
-                    r"\1\2 clearly exemplifies the power of \3",
-                    r"\1\2 powerfully validates \3"
-                ]
-            ),
-            (
-                r"\bstands as a testament to human innovation\b",
-                [
-                    "serves as tangible proof of human innovation",
-                    "clearly exemplifies human ingenuity",
-                    "powerfully reflects what human ingenuity can achieve"
+                    "provides tangible evidence of ",
+                    "clearly exemplifies ",
+                    "directly corroborates "
                 ]
             ),
 
@@ -326,6 +319,191 @@ class DeepRephraser:
             (
                 r"\bare connected to\b",
                 ["link with", "interface with", "align with"]
+            ),
+
+            # --- Turnitout GodGuide Multi-Word Phrase Rewrites (Shatters 4-5 K-Gram Hashes at Once) ---
+            # Literature Review
+            (
+                r"\bprevious studies have shown\b",
+                ["prior investigations have substantiated", "earlier scholarship confirms", "past research has attested"]
+            ),
+            (
+                r"\bhas been widely studied\b",
+                ["has been the subject of extensive inquiry", "has drawn sustained empirical scrutiny", "has undergone broad investigation"]
+            ),
+            (
+                r"\bit has been reported that\b",
+                ["extant literature attests that", "published work indicates that", "earlier findings document that"]
+            ),
+            (
+                r"\baccording to recent research\b",
+                ["as corroborated by contemporary scholarship", "in light of current studies", "as evidenced in recent investigations"]
+            ),
+            (
+                r"\bis well documented\b",
+                ["has been amply chronicled in the literature", "is thoroughly attested across studies"]
+            ),
+            (
+                r"\bas mentioned earlier\b",
+                ["as alluded to in the preceding discussion", "as established previously", "as outlined earlier"]
+            ),
+            (
+                r"\bthe existing literature\b",
+                ["the prevailing body of scholarship", "current academic publications", "prior research"]
+            ),
+            (
+                r"\bthis research paper\b",
+                ["the present study", "the current investigation", "this manuscript"]
+            ),
+            (
+                r"\bin this study\b",
+                ["throughout this investigation", "within the present inquiry", "across this examination"]
+            ),
+            (
+                r"\bin this paper\b",
+                ["within the present manuscript", "throughout this work", "in the current study"]
+            ),
+
+            # Methodology Phrases
+            (
+                r"\bwas carried out\b",
+                ["was undertaken", "was executed", "was administered"]
+            ),
+            (
+                r"\bwere carried out\b",
+                ["were undertaken", "were executed", "were administered"]
+            ),
+            (
+                r"\bin order to\b",
+                ["so as to", "aiming to", "seeking to"]
+            ),
+            (
+                r"\bby means of\b",
+                ["through recourse to", "utilizing", "via"]
+            ),
+            (
+                r"\bwith respect to\b",
+                ["regarding", "concerning", "in relation to"]
+            ),
+            (
+                r"\bwas conducted\b",
+                ["was effectuated", "was executed", "was performed"]
+            ),
+            (
+                r"\bwere conducted\b",
+                ["were effectuated", "were executed", "were performed"]
+            ),
+            (
+                r"\btakes into account\b",
+                ["gives due consideration to", "incorporates", "accounts for"]
+            ),
+            (
+                r"\btake into account\b",
+                ["give due consideration to", "incorporate", "account for"]
+            ),
+            (
+                r"\bis based on\b",
+                ["draws its foundations from", "rests upon", "stems from"]
+            ),
+            (
+                r"\bare based on\b",
+                ["draw their foundations from", "rest upon", "stem from"]
+            ),
+
+            # Results & Findings Phrases
+            (
+                r"\bthe results indicate\b",
+                ["the findings bear witness to", "empirical data suggest", "observed outcomes show"]
+            ),
+            (
+                r"\bthe findings indicate\b",
+                ["the outcomes establish", "empirical data show", "observed results demonstrate"]
+            ),
+            (
+                r"\bit can be seen that\b",
+                ["it becomes manifest that", "observations reveal that", "one notes that"]
+            ),
+            (
+                r"\bas shown in\b",
+                ["as rendered visible in", "as depicted within", "as demonstrated in"]
+            ),
+            (
+                r"\bit was found that\b",
+                ["it was ascertained that", "experiments established that", "evaluation confirmed that"]
+            ),
+            (
+                r"\ba significant increase\b",
+                ["an appreciable escalation", "a pronounced rise", "a marked expansion"]
+            ),
+            (
+                r"\bis proportional to\b",
+                ["scales commensurately with", "varies directly alongside"]
+            ),
+
+            # Discussion & Analysis
+            (
+                r"\bit is worth noting that\b",
+                ["it merits underscoring that", "importantly,", "one should note that"]
+            ),
+            (
+                r"\bthis can be attributed to\b",
+                ["this may be imputed to", "such behavior stems from", "this reflects"]
+            ),
+            (
+                r"\bis consistent with\b",
+                ["accords harmoniously with", "aligns squarely with", "corresponds closely to"]
+            ),
+            (
+                r"\bare consistent with\b",
+                ["accord harmoniously with", "align squarely with", "correspond closely to"]
+            ),
+            (
+                r"\bin good agreement with\b",
+                ["in satisfactory concordance with", "closely aligned with", "well supported by"]
+            ),
+
+            # Conclusion & Future Work
+            (
+                r"\bin conclusion,?\s*",
+                ["To encapsulate, ", "On balance, ", "Taking these outcomes together, "]
+            ),
+            (
+                r"\bfurther research is needed\b",
+                ["subsequent investigation is warranted", "additional scholarly inquiry remains necessary"]
+            ),
+            (
+                r"\bfuture work should\b",
+                ["prospective endeavors ought to", "subsequent studies should", "upcoming investigations must"]
+            ),
+
+            # Hedging & Quantification
+            (
+                r"\bit appears that\b",
+                ["it would seem plausible that", "available evidence implies that"]
+            ),
+            (
+                r"\bit is possible that\b",
+                ["one may reasonably conjecture that", "plausibly,"]
+            ),
+            (
+                r"\bto some extent\b",
+                ["to a nontrivial degree", "partially", "in appreciable measure"]
+            ),
+            (
+                r"\ba large number of\b",
+                ["a profusion of", "copious", "numerous", "a host of"]
+            ),
+            (
+                r"\ba wide range of\b",
+                ["a broad gamut of", "a diverse spectrum of", "an extensive array of"]
+            ),
+            (
+                r"\bdue to the fact that\b",
+                ["on the grounds that", "inasmuch as", "given that", "since"]
+            ),
+            (
+                r"\bas a result of\b",
+                ["consequent upon", "stemming from", "owing to"]
             )
         ]
 

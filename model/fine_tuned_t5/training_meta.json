@@ -1,43 +1,25 @@
 {
   "base_model": "google-t5/t5-small",
-  "samples_trained": 324,
-  "val_samples": 36,
-  "epochs": 4,
-  "total_steps": 108,
-  "final_train_loss": 0.6706,
-  "final_val_loss": 0.7338,
-  "best_val_loss": 0.7338,
-  "perplexity": 2.08,
-  "elapsed_seconds": 973.82,
+  "samples_trained": 72,
+  "val_samples": 8,
+  "epochs": 1,
+  "total_steps": 9,
+  "final_train_loss": 0.3149,
+  "final_val_loss": 0.4508,
+  "best_val_loss": 0.4508,
+  "perplexity": 1.57,
+  "elapsed_seconds": 93.36,
   "device": "cpu",
   "threads": 12,
   "epoch_history": [
     {
       "epoch": 1,
-      "train_loss": 0.6983,
-      "val_loss": 0.7435,
-      "perplexity": 2.1
-    },
-    {
-      "epoch": 2,
-      "train_loss": 0.6842,
-      "val_loss": 0.7369,
-      "perplexity": 2.09
-    },
-    {
-      "epoch": 3,
-      "train_loss": 0.6761,
-      "val_loss": 0.7344,
-      "perplexity": 2.08
-    },
-    {
-      "epoch": 4,
-      "train_loss": 0.6706,
-      "val_loss": 0.7338,
-      "perplexity": 2.08
+      "train_loss": 0.3149,
+      "val_loss": 0.4508,
+      "perplexity": 1.57
     }
   ],
   "sample_inference_test": "Deep learning algorithms delve into massive datasets.",
-  "timestamp": "2026-10-18T16:37:17Z",
+  "timestamp": "2026-11-25T17:17:26Z",
   "status": "production_fine_tuned_ready"
 }

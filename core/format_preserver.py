@@ -96,8 +96,8 @@ class FormatPreserver:
                 i += 1
                 continue
 
-            # 2. Empty Line
-            if not stripped:
+            # 2. Empty Line or Standalone Masked LaTeX / Section / Equation Line
+            if not stripped or re.match(r"^\s*(?:XLTXMASK\d+X\s*)+$", line):
                 blocks.append({
                     "type": "empty",
                     "verbatim": line
@@ -177,6 +177,7 @@ class FormatPreserver:
                 next_str = next_l.strip()
                 if (
                     not next_str
+                    or re.match(r"^\s*(?:XLTXMASK\d+X\s*)+$", next_l)
                     or cls.RE_CODE_FENCE.match(next_l)
                     or cls.RE_TABLE_ROW.match(next_l)
                     or cls.RE_HEADING.match(next_l)
@@ -229,19 +230,66 @@ class FormatPreserver:
         return blocks
 
     @classmethod
+    def mask_latex(cls, text: str) -> Tuple[str, Dict[str, str]]:
+        r"""
+        Protects LaTeX math environments, equations, preambles, citations (\cite{}),
+        and structural macros (\section{}, \label{}, \ref{}) before any prose rewriting.
+        """
+        if "\\" not in text and "$" not in text:
+            return text, {}
+
+        mapping: Dict[str, str] = {}
+        counter = 0
+
+        latex_patterns = [
+            # Multi-line math, figure, and table environments
+            re.compile(r"\\begin\{(?:equation|equation\*|align|align\*|matrix|pmatrix|bmatrix|cases|gather|figure|table|verbatim|lstlisting)\}.*?\\end\{(?:equation|equation\*|align|align\*|matrix|pmatrix|bmatrix|cases|gather|figure|table|verbatim|lstlisting)\}", re.DOTALL),
+            # Display math $$...$$ and \[...\]
+            re.compile(r"\$\$.*?\$\$", re.DOTALL),
+            re.compile(r"\\\[.*?\\\]", re.DOTALL),
+            # Structural LaTeX commands & citations: \cite{...}, \label{...}, \ref{...}, \section{...}, \usepackage{...}
+            re.compile(r"\\(?:cite|citep|citet|citealp|citealt|label|ref|eqref|url|href|documentclass|usepackage|bibliography|bibliographystyle|section|subsection|subsubsection|chapter|title|author|date|begin|end|item)(?:\[[^\]]*\])?(?:\{[^}]*\})+"),
+            # Inline math $...$ (single line, non-empty, not starting with digit like "$50")
+            re.compile(r"\$(?!\s*\d+(?:\.\d+)?\b)[^\n$]+\$"),
+        ]
+
+        masked = text
+        for pat in latex_patterns:
+            def _repl(m: re.Match) -> str:
+                nonlocal counter
+                token = f"XLTXMASK{counter:04d}X"
+                mapping[token] = m.group(0)
+                counter += 1
+                return token
+            masked = pat.sub(_repl, masked)
+
+        return masked, mapping
+
+    @classmethod
+    def unmask_latex(cls, text: str, mapping: Dict[str, str]) -> str:
+        """Restores protected LaTeX environments, commands, and math verbatim."""
+        if not mapping:
+            return text
+        restored = text
+        for token, orig in mapping.items():
+            restored = restored.replace(token, orig)
+        return restored
+
+    @classmethod
     def process_and_reconstruct(
         cls,
         text: str,
         humanize_fn: Callable[[str], str]
     ) -> str:
         """
-        Parses text, transforms every translatable element through humanize_fn,
-        and reconstructs the exact layout with 100% structural fidelity.
+        Parses text, shields LaTeX commands/equations, transforms every translatable
+        element through humanize_fn, and reconstructs exact layout with 100% fidelity.
         """
         if not text:
             return ""
 
-        blocks = cls.parse_document_blocks(text)
+        masked_text, latex_map = cls.mask_latex(text)
+        blocks = cls.parse_document_blocks(masked_text)
         reconstructed: List[str] = []
 
         from core.document_parser import DocumentParser
@@ -289,15 +337,18 @@ class FormatPreserver:
                 if not content:
                     reconstructed.append(b["suffix"])
                     continue
-                # For prose blocks, check reference entries and metadata (using p_idx=999 so non-period lines aren't misclassified)
+                # If paragraph is predominantly LaTeX mask tokens, keep verbatim
+                stripped_masks = re.sub(r"XLTXMASK\d+X", "", content).strip()
                 if (
-                    DocumentParser.is_reference_entry(content)
+                    not stripped_masks
+                    or len(stripped_masks.split()) < 2
+                    or DocumentParser.is_reference_entry(content)
                     or DocumentParser.is_academic_metadata(content, p_idx=999)
-                    or len(content.split()) < 2
                 ):
                     transformed = content
                 else:
                     transformed = humanize_fn(content)
                 reconstructed.append(f"{transformed}{b['suffix']}")
 
-        return "".join(reconstructed)
+        output_text = "".join(reconstructed)
+        return cls.unmask_latex(output_text, latex_map)

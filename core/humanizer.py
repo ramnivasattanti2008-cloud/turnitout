@@ -55,12 +55,16 @@ class TextHumanizer:
         intensity: float = 0.50,
         preserve_keywords: Optional[List[str]] = None,
         adversarial_mode: bool = True,
-        mode: str = "standard"
+        mode: str = "standard",
+        zero_expansion: bool = False,
+        inject_citations: bool = False,
+        citation_format: str = "IEEE",
+        options: Optional[Dict[str, bool]] = None
     ) -> Dict[str, Any]:
         """
         Executes complete multi-stage transformation on input text.
-        Supports Beast Mode, multi-paragraph documents, deep adversarial optimization,
-        grammar fluency polishing, and 5-detector radar verification.
+        Supports Beast Mode, Zero-Expansion Mode (1:1 parity), Academic Citations,
+        multi-paragraph documents, deep adversarial optimization, and 6-detector verification.
         """
         clean_input = self.scrubber.scrub(text.strip())["clean_text"]
         if not clean_input:
@@ -77,18 +81,19 @@ class TextHumanizer:
 
         # Check for specialized execution modes
         mode_str = (mode or "standard").lower()
-        if mode_str == "beast":
+        if mode_str in ("beast", "obliterator", "academic"):
+            eff_intensity = max(intensity, 0.78) if mode_str == "obliterator" else intensity
+            vocab = "scholar" if mode_str in ("beast", "academic", "obliterator") else "standard"
             return self.beast.execute_beast_mode(
                 clean_input,
-                intensity=intensity,
-                preserve_keywords=preserve_keywords
+                vocabulary_level=vocab,
+                intensity=eff_intensity,
+                preserve_keywords=preserve_keywords,
+                zero_expansion=zero_expansion,
+                inject_citations=inject_citations,
+                citation_format=citation_format,
+                options=options
             )
-        elif mode_str == "academic":
-            tone = "academic"
-            intensity = max(intensity, 0.60)
-        elif mode_str == "obliterator":
-            tone = "academic"
-            intensity = max(intensity, 0.75)
         elif mode_str in ("neural", "transformer", "sft"):
             tone = "academic"
             intensity = max(intensity, 0.65)
@@ -131,6 +136,7 @@ class TextHumanizer:
             "humanized_text": combined_humanized,
             "tone": tone,
             "intensity": intensity,
+            "zero_expansion": zero_expansion,
             "metrics": {
                 "ai_score_before": before_ai["ai_probability"],
                 "ai_score_after": after_ai["ai_probability"],
@@ -138,6 +144,7 @@ class TextHumanizer:
                 "plagiarism_risk": plag["plagiarism_risk_score"],
                 "plagiarism_risk_score": plag["plagiarism_risk_score"],
                 "uniqueness_score": plag["uniqueness_score"],
+                "winnowing_matches": plag.get("winnowing", {}).get("matching_fingerprints", 0),
                 "readability_before": before_ai["readability"],
                 "readability_after": after_ai["readability"]
             },
@@ -157,19 +164,24 @@ class TextHumanizer:
         mode: str = "beast",
         tone: str = "academic",
         intensity: float = 0.70,
-        preserve_keywords: Optional[List[str]] = None
+        preserve_keywords: Optional[List[str]] = None,
+        zero_expansion: bool = False,
+        options: Optional[Dict[str, bool]] = None
     ) -> str:
         """
         Ultra-fast direct block humanization without redundant forensic/radar re-computation.
         Ideal for document loops (.docx paragraphs, tables).
         """
         mode_str = (mode or "beast").lower()
-        if mode_str == "beast":
+        if mode_str in ("beast", "academic", "obliterator"):
+            eff_intensity = max(intensity, 0.78) if mode_str == "obliterator" else intensity
             return self.beast.transform_single_block(
                 text,
                 vocabulary_level="scholar",
-                intensity=intensity,
-                preserve_keywords=preserve_keywords
+                intensity=eff_intensity,
+                preserve_keywords=preserve_keywords,
+                zero_expansion=zero_expansion,
+                options=options
             )
         else:
             res = self.process_single_paragraph(
@@ -198,7 +210,26 @@ class TextHumanizer:
             )
             # Apply grammar fluency perfection
             res["humanized_text"] = self.fluency.polish(res["humanized_text"])
-            res["humanized_text"] = self.adversarial_optimizer.disrupt_verbatim_ngrams(clean_input, res["humanized_text"], n=4, max_passes=5)
+            kw_map = {}
+            masked_txt = res["humanized_text"]
+            if preserve_keywords:
+                for idx, kw in enumerate(sorted(preserve_keywords, key=len, reverse=True)):
+                    if kw and kw.strip():
+                        tok = f"XKWPROTECT{idx}X"
+                        pat = re.compile(re.escape(kw.strip()), re.IGNORECASE)
+                        def _stash(m, _tok=tok, _idx=idx):
+                            kw_map[f"{_tok}_{len(kw_map)}"] = m.group(0)
+                            return f"{_tok}_{len(kw_map) - 1}"
+                        # Use deterministic single replacement key per match
+                        def _stash_det(m, _tok=tok):
+                            k = f"{_tok}U{len(kw_map)}U"
+                            kw_map[k] = m.group(0)
+                            return k
+                        masked_txt = pat.sub(_stash_det, masked_txt)
+            disrupted_txt = self.adversarial_optimizer.disrupt_verbatim_ngrams(clean_input, masked_txt, n=4, max_passes=5)
+            for k, orig in kw_map.items():
+                disrupted_txt = disrupted_txt.replace(k, orig)
+            res["humanized_text"] = disrupted_txt
             after_ai = self.analyzer.compute_ai_score(res["humanized_text"])
             plag = self.analyzer.check_plagiarism_similarity(clean_input, res["humanized_text"])
             if "metrics" in res:

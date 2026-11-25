@@ -205,7 +205,7 @@ class CitationEngine:
     ) -> Tuple[str, List[str]]:
         """
         Injects citations directly into the text at sentence boundaries.
-        format: 'numeric' for [1], [2] or 'latex' for \\cite{key}.
+        format: 'numeric' for [1], [2], 'apa' for (Author, Year), or 'latex' for \\cite{key}.
         """
         refs_bundle = self.generate_references(text_context=text, count=count)
         selected = refs_bundle["json_metadata"]
@@ -213,14 +213,55 @@ class CitationEngine:
             return text, []
 
         sentences = re.split(r"(?<=[.!?])\s+", text.strip())
-        injected_keys = []
+        if len(sentences) < len(selected):
+            sentences = re.split(r"(?<=[.;!?])\s+", text.strip())
 
-        if len(sentences) >= 2 and len(selected) >= 1:
+        injected_keys = []
+        fmt_low = (citation_format or "numeric").lower()
+
+        if len(sentences) >= 1 and len(selected) >= 1:
             for idx, p in enumerate(selected):
-                target_sentence_idx = min(len(sentences) - 1, idx * 2 + 1)
-                s = sentences[target_sentence_idx].rstrip(".!?")
-                marker = f" [{idx + 1}]" if citation_format == "numeric" else f" \\cite{{{p['id']}}}"
-                sentences[target_sentence_idx] = f"{s}{marker}."
+                target_sentence_idx = (idx * len(sentences)) // len(selected) if len(sentences) >= len(selected) else min(len(sentences) - 1, idx)
+                raw = sentences[target_sentence_idx].rstrip()
+                punc = raw[-1] if raw and raw[-1] in ".;!?" else "."
+                s = raw[:-1] if raw and raw[-1] in ".;!?" else raw
+                if "latex" in fmt_low or "cite" in fmt_low:
+                    marker = f" \\cite{{{p['id']}}}"
+                elif "apa" in fmt_low:
+                    first_author = p["authors"].split(",")[0].split()[-1]
+                    marker = f" ({first_author} et al., {p['year']})"
+                else:
+                    marker = f" [{idx + 1}]"
+                sentences[target_sentence_idx] = f"{s}{marker}{punc}"
                 injected_keys.append(p['id'])
 
         return " ".join(sentences), injected_keys
+
+    def inject_citations(
+        self,
+        text: str,
+        fmt: str = "IEEE",
+        count: int = 2,
+        discipline: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Injects citations cleanly and returns cited text + self-executing AI Auto-Fill BibTeX bundle.
+        """
+        cited_text, keys = self.inject_citations_into_text(text, count=count, citation_format=fmt)
+        refs = self.generate_references(discipline=discipline, count=count, text_context=text)
+        ai_header = (
+            "% ==============================================================================\n"
+            "% AI AUTO-FILL INSTRUCTIONS (CHATGPT / CLAUDE / GEMINI / DEEPSEEK)\n"
+            "% ------------------------------------------------------------------------------\n"
+            "% To verify or enrich these contextual placeholders with specific DOIs,\n"
+            "% paste this file directly into any AI assistant while preserving citation keys.\n"
+            "% ==============================================================================\n\n"
+        )
+        return {
+            "cited_text": cited_text,
+            "bib_text": ai_header + refs["bibtex"],
+            "citation_count": len(keys),
+            "citation_keys": keys,
+            "discipline": refs["discipline"],
+            "plain_references": refs["plain_references"],
+        }

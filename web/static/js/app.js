@@ -15,6 +15,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const labelIntensity = document.getElementById("label-intensity");
   const selectTone = document.getElementById("select-tone");
   const inputKeywords = document.getElementById("input-keywords");
+  const chkZeroExpansion = document.getElementById("chk-zero-expansion");
+  const chkInjectCitations = document.getElementById("chk-inject-citations");
 
   // Beast Mode & Tools Elements
   const btnToggleBeast = document.getElementById("btn-toggle-beast");
@@ -59,9 +61,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const meter3gram = document.getElementById("meter-3gram");
   const meter4gram = document.getElementById("meter-4gram");
   const meter5gram = document.getElementById("meter-5gram");
+  const meterWinnowing = document.getElementById("meter-winnowing");
   const val3gram = document.getElementById("val-3gram");
   const val4gram = document.getElementById("val-4gram");
   const val5gram = document.getElementById("val-5gram");
+  const valWinnowing = document.getElementById("val-winnowing");
   const modelStatusText = document.getElementById("model-status-text");
   const modeGuidanceText = document.getElementById("mode-guidance-text");
   const btnDownloadDocx = document.getElementById("btn-download-docx");
@@ -420,6 +424,7 @@ document.addEventListener("DOMContentLoaded", () => {
       formData.append("mode", selectMode ? selectMode.value : "beast");
       formData.append("intensity", parseFloat(sliderIntensity.value) / 100.0);
       formData.append("preserve_keywords", inputKeywords.value);
+      formData.append("zero_expansion", chkZeroExpansion && chkZeroExpansion.checked ? "true" : "false");
 
       try {
         const resp = await fetch("/api/humanize/docx", {
@@ -535,7 +540,9 @@ document.addEventListener("DOMContentLoaded", () => {
       tone: selectTone.value,
       intensity: parseFloat(sliderIntensity.value) / 100.0,
       preserve_keywords: inputKeywords.value,
-      mode: selectMode ? selectMode.value : "beast"
+      mode: selectMode ? selectMode.value : "beast",
+      zero_expansion: Boolean(chkZeroExpansion && chkZeroExpansion.checked),
+      inject_citations: Boolean(chkInjectCitations && chkInjectCitations.checked)
     };
 
     try {
@@ -684,6 +691,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const n3 = plag.ngram_3_overlap !== undefined ? plag.ngram_3_overlap : 0;
     const n4 = plag.ngram_4_overlap !== undefined ? plag.ngram_4_overlap : 0;
     const n5 = plag.ngram_5_overlap !== undefined ? plag.ngram_5_overlap : 0;
+    const winPct = (plag.winnowing && plag.winnowing.winnowing_similarity_pct !== undefined)
+      ? plag.winnowing.winnowing_similarity_pct
+      : 0;
 
     if (meter3gram) meter3gram.style.width = `${Math.min(100, Math.max(0, n3))}%`;
     if (val3gram) val3gram.textContent = `${n3}%`;
@@ -693,6 +703,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (meter5gram) meter5gram.style.width = `${Math.min(100, Math.max(0, n5))}%`;
     if (val5gram) val5gram.textContent = `${n5}%`;
+
+    if (meterWinnowing) meterWinnowing.style.width = `${Math.min(100, Math.max(0, winPct))}%`;
+    if (valWinnowing) valWinnowing.textContent = `${winPct}%`;
   }
 
   function updateReadabilityTable(rb, ra, lb, la) {

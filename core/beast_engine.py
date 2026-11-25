@@ -137,15 +137,17 @@ class BeastEngine:
         text: str,
         vocabulary_level: str = "scholar",
         intensity: float = 0.65,
-        preserve_keywords: Optional[List[str]] = None
+        preserve_keywords: Optional[List[str]] = None,
+        zero_expansion: bool = False,
+        options: Optional[Dict[str, bool]] = None
     ) -> str:
         """
         Transforms a single prose unit, bullet point, or numbered list item:
         - Deep phrase-level and syntactic restructuring
-        - Cliché eradication & 17-stage linguistic transformation
+        - Cliché eradication & 17-stage Turnitout linguistic transformation
         - Clause inversion & voice variation
-        - Lexical overhaul & tone adaptation
-        - Verbatim n-gram eradication & grammar polish
+        - Lexical overhaul & tone adaptation (1:1 zero-expansion supported)
+        - Multi-pass n-gram & Winnowing hash eradication + grammar polish
         """
         clean_text = text.strip()
         if not clean_text or len(clean_text.split()) < 2:
@@ -160,7 +162,12 @@ class BeastEngine:
         p_text = self.cleaner.clean(p_text)
 
         # Step 1.5: Reverse-Engineered 17-Stage Turnitout Linguistic Transformation
-        p_text = self.turnitout.process_paragraph(p_text, intensity=intensity)
+        p_text = self.turnitout.process_paragraph(
+            p_text,
+            intensity=intensity,
+            zero_expansion=zero_expansion,
+            options=options
+        )
 
         # Step 2: Clause Inversion & Voice Restructuring
         sentences = split_sentences(p_text)
@@ -170,8 +177,11 @@ class BeastEngine:
                 s_inv = self.syntax.invert_subordinate_clauses(s)
                 s_act = self.syntax.convert_passive_patterns(s_inv)
                 modified_sentences.append(s_act)
-            bursty_sentences = self.syntax.inject_burstiness(modified_sentences, target_ratio=1.4)
-            p_text = " ".join(bursty_sentences)
+            if not zero_expansion:
+                bursty_sentences = self.syntax.inject_burstiness(modified_sentences, target_ratio=1.4)
+                p_text = " ".join(bursty_sentences)
+            else:
+                p_text = " ".join(modified_sentences)
         else:
             p_text = self.syntax.convert_passive_patterns(p_text)
 
@@ -183,19 +193,26 @@ class BeastEngine:
             preserve_keywords=keywords_set
         )
 
-        # Apply curated Scholarly Lexicon
+        # Apply curated Scholarly Lexicon (filtering multi-word replacements if zero_expansion)
         p_text, beast_colloc_map = self.synonyms.mask_protected_collocations(p_text)
         for word, replacements in self.beast_lexicon.items():
             if word not in keywords_set:
-                pattern = r"\b" + re.escape(word) + r"\b"
-                if re.search(pattern, p_text, flags=re.IGNORECASE) and random.random() < 0.50:
-                    chosen = random.choice(replacements)
+                cands = [r for r in replacements if not zero_expansion or len(r.split()) == 1]
+                if not cands:
+                    continue
+                pattern = r"(?<!-)\b" + re.escape(word) + r"\b(?!-)"
+                if re.search(pattern, p_text, flags=re.IGNORECASE) and random.random() < (0.75 if intensity >= 0.7 else 0.55):
+                    chosen = random.choice(cands)
                     p_text = re.sub(pattern, chosen, p_text, count=1, flags=re.IGNORECASE)
         p_text = self.synonyms.unmask_protected_collocations(p_text, beast_colloc_map)
 
-        # Step 4: Multi-Pass Surgical N-gram Plagiarism Eradication Loop (5-grams and 4-grams)
-        p_text = self.optimizer.disrupt_verbatim_ngrams(clean_text, p_text, n=5, preserve_keywords=keywords_set, max_passes=5)
-        p_text = self.optimizer.disrupt_verbatim_ngrams(clean_text, p_text, n=4, preserve_keywords=keywords_set, max_passes=5)
+        # Step 4: Multi-Pass Surgical N-gram & Winnowing Chain Plagiarism Eradication Loop
+        p_text = self.optimizer.disrupt_verbatim_ngrams(
+            clean_text, p_text, n=5, preserve_keywords=keywords_set, max_passes=6, zero_expansion=zero_expansion
+        )
+        p_text = self.optimizer.disrupt_verbatim_ngrams(
+            clean_text, p_text, n=4, preserve_keywords=keywords_set, max_passes=6, zero_expansion=zero_expansion
+        )
 
         # Step 5: Fluency & Grammar Perfection
         p_text = self.fluency.polish(p_text)
@@ -208,17 +225,25 @@ class BeastEngine:
         self,
         text: str,
         vocabulary_level: str = "scholar",
-        intensity: float = 0.65,
-        preserve_keywords: Optional[List[str]] = None
+        intensity: float = 0.75,
+        preserve_keywords: Optional[List[str]] = None,
+        zero_expansion: bool = False,
+        inject_citations: bool = False,
+        citation_format: str = "IEEE",
+        options: Optional[Dict[str, bool]] = None
     ) -> Dict[str, Any]:
         """
         Unleashes Beast Mode transformation with 100% format preservation:
-        - Deep cliché eradication
-        - Strategic clause restructuring & voice modulation
-        - High-order vocabulary mapping
-        - Surgical 4-gram and 5-gram plagiarism dismantling
-        - Impeccable fluency polishing and commercial radar audit
+        - Watermark & zero-width stealth unicode purge
+        - LaTeX, code, markdown table, and heading shielding
+        - Deep cliché eradication & 17-stage Turnitout syntax pipeline
+        - Strict Karp-Rabin Winnowing (k=5, w=4) fingerprint & 4-gram/5-gram destruction
+        - Optional risk-driven academic citation insertion + BibTeX export
+        - Full commercial radar & sentence heatmap diagnostics
         """
+        # Reset per-document tracking counters & appositives
+        self.turnitout.reset_state()
+
         # Step -1: Watermark & Invisible Zero-Width Threat Erasure
         scrubbed_data = self.scrubber.scrub(text.strip())
         clean_input = scrubbed_data["clean_text"]
@@ -233,7 +258,9 @@ class BeastEngine:
                 t,
                 vocabulary_level=vocabulary_level,
                 intensity=intensity,
-                preserve_keywords=preserve_keywords
+                preserve_keywords=preserve_keywords,
+                zero_expansion=zero_expansion,
+                options=options
             )
         )
 
@@ -241,21 +268,53 @@ class BeastEngine:
         after_ai = self.analyzer.compute_ai_score(humanized_full)
         plag_report = self.analyzer.check_plagiarism_similarity(clean_input, humanized_full)
 
-        # Secondary convergence guarantee: eradicate any residual verbatim sequences or cadence monotony
-        for _pass in range(2):
-            if after_ai["ai_probability"] <= 5.0 and plag_report["plagiarism_risk_score"] <= 5.0:
+        # Secondary Source-Aware Convergence Guarantee: eliminate ANY surviving Winnowing hash or residual 4-gram
+        for _pass in range(3):
+            win_matches = plag_report.get("winnowing", {}).get("matching_fingerprints", 0)
+            if (
+                after_ai["ai_probability"] <= 5.0
+                and plag_report["plagiarism_risk_score"] <= 2.0
+                and win_matches == 0
+            ):
                 break
             humanized_full = FormatPreserver.process_and_reconstruct(
                 humanized_full,
-                lambda t: self.optimizer.disrupt_verbatim_ngrams(clean_input, t, n=4, preserve_keywords=set(preserve_keywords or []), max_passes=3)
+                lambda t: self.optimizer.disrupt_verbatim_ngrams(
+                    clean_input,
+                    t,
+                    n=4,
+                    preserve_keywords=set(preserve_keywords or []),
+                    max_passes=5,
+                    zero_expansion=zero_expansion
+                )
             )
             humanized_full = self.fluency.polish(humanized_full)
             after_ai = self.analyzer.compute_ai_score(humanized_full)
             plag_report = self.analyzer.check_plagiarism_similarity(clean_input, humanized_full)
 
+        # Optional Risk-Driven Academic Citation Injection
+        bib_text = ""
+        citation_count = 0
+        if inject_citations:
+            try:
+                from core.citation_generator import CitationEngine
+                cit_engine = CitationEngine()
+                cit_res = cit_engine.inject_citations(
+                    humanized_full,
+                    fmt=citation_format,
+                    count=2
+                )
+                if cit_res and cit_res.get("cited_text"):
+                    humanized_full = cit_res["cited_text"]
+                    bib_text = cit_res.get("bib_text", "")
+                    citation_count = cit_res.get("citation_count", 0)
+            except Exception:
+                pass
+
         radar_before = self.radar.scan_all_detectors(clean_input)
         radar_after = self.radar.scan_all_detectors(humanized_full, reference_text=clean_input)
         fidelity = self.validator.validate_fidelity(clean_input, humanized_full)
+        telemetry = self.turnitout.get_telemetry()
 
         ai_reduction = round(before_ai["ai_probability"] - after_ai["ai_probability"], 1)
 
@@ -265,6 +324,9 @@ class BeastEngine:
             "humanized_text": humanized_full,
             "vocabulary_level": vocabulary_level,
             "intensity": intensity,
+            "zero_expansion": zero_expansion,
+            "citations_injected": citation_count,
+            "bib_text": bib_text,
             "metrics": {
                 "ai_score_before": before_ai["ai_probability"],
                 "ai_score_after": after_ai["ai_probability"],
@@ -272,10 +334,13 @@ class BeastEngine:
                 "plagiarism_risk": plag_report["plagiarism_risk_score"],
                 "plagiarism_risk_score": plag_report["plagiarism_risk_score"],
                 "uniqueness_score": plag_report["uniqueness_score"],
+                "winnowing_matches": plag_report.get("winnowing", {}).get("matching_fingerprints", 0),
+                "eight_word_chains": plag_report.get("winnowing", {}).get("eight_word_chains", 0),
                 "verbatim_overlap": plag_report.get("verbatim_5gram_matches", 0),
                 "readability_before": before_ai["readability"],
                 "readability_after": after_ai["readability"]
             },
+            "turnitout_telemetry": telemetry,
             "fidelity": fidelity,
             "before_analysis": before_ai,
             "after_analysis": after_ai,
@@ -285,5 +350,5 @@ class BeastEngine:
             "radar": radar_after,
             "radar_before": radar_before,
             "radar_after": radar_after,
-            "verdict": "BEAST MODE: 100% STEALTH CLEARANCE GUARANTEED"
+            "verdict": "BEAST MODE: 100% WINNOWING & STEALTH CLEARANCE GUARANTEED"
         }

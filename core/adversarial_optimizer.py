@@ -197,7 +197,8 @@ class AdversarialOptimizer:
         current_text: str,
         n: int = 4,
         preserve_keywords: Optional[Set[str]] = None,
-        max_passes: int = 15
+        max_passes: int = 15,
+        zero_expansion: bool = False
     ) -> str:
         """
         Pinpoints exact n-gram verbatim matches between original and current text,
@@ -212,6 +213,12 @@ class AdversarialOptimizer:
         result_text = current_text
         keywords_lower = {k.lower() for k in (preserve_keywords or set())}
         keyword_words = {w for kw in keywords_lower for w in kw.split()}
+        # Protect constituent words of any PROTECTED_COLLOCATIONS present in the text
+        from core.synonym_engine import PROTECTED_COLLOCATIONS
+        lower_curr = current_text.lower()
+        for colloc in PROTECTED_COLLOCATIONS:
+            if colloc in lower_curr:
+                keyword_words.update(colloc.split())
 
         for _ in range(max_passes):
             curr_tokens = tokenize_words(result_text)
@@ -240,7 +247,7 @@ class AdversarialOptimizer:
                         # Priority 0: Sentence boundary discourse transition
                         # Shatters n-grams that span across sentence periods (. / ! / ?)
                         boundary_match = re.search(r"([.!?])\s+([A-Za-z])", matched_slice)
-                        if boundary_match:
+                        if boundary_match and not zero_expansion:
                             after_boundary = matched_slice[boundary_match.start(2):]
                             trans_match = re.match(r"^(however|consequently|to be sure|indeed|furthermore|moreover|meanwhile|nevertheless)\b", after_boundary, flags=re.IGNORECASE)
                             if trans_match:
@@ -287,20 +294,25 @@ class AdversarialOptimizer:
                                     or cand_word in PROTECTED_TECHNICAL_WORDS
                                 ):
                                     continue
+                                # Do not fragment hyphenated compounds unless full compound matches
+                                if not re.search(rf"(?<!-)\b{re.escape(ngram[pos])}\b(?!-)", matched_slice, flags=re.IGNORECASE):
+                                    continue
                                 cand_pair1 = f"{cand_word} {ngram[pos + 1].lower()}" if pos < n - 1 else ""
                                 cand_pair2 = f"{ngram[pos - 1].lower()} {cand_word}" if pos > 0 else ""
                                 if cand_pair1 in colloc_set or cand_pair2 in colloc_set:
                                     continue
                                 w_dict = self.synonym_engine.thesaurus.get(cand_word, {})
                                 raw_candidates = list(
-                                    w_dict.get("standard", [])
-                                    or w_dict.get("academic", [])
+                                    w_dict.get("academic", [])
+                                    or w_dict.get("standard", [])
                                     or w_dict.get("journalistic", [])
                                 )
                                 ai_buzz_set = set(AI_BUZZWORDS)
                                 candidates = [
                                     c for c in raw_candidates
-                                    if c.lower() not in ai_buzz_set and c.lower() not in BANNED_OBSCURE_LEMMAS
+                                    if c.lower() not in ai_buzz_set
+                                    and c.lower() not in BANNED_OBSCURE_LEMMAS
+                                    and (not zero_expansion or len(c.split()) == 1)
                                 ]
                                 if candidates:
                                     replacement = random.choice(candidates)
@@ -309,20 +321,21 @@ class AdversarialOptimizer:
                                     elif ngram[pos].istitle():
                                         replacement = replacement.capitalize()
 
-                                    # Replace exact token in matched_slice
-                                    word_pat = rf"\b{re.escape(ngram[pos])}\b"
+                                    word_pat = rf"(?<!-)\b{re.escape(ngram[pos])}\b(?!-)"
                                     new_slice = re.sub(word_pat, replacement, matched_slice, count=1, flags=re.IGNORECASE)
-                                    result_text = result_text[:match.start()] + new_slice + result_text[match.end():]
-                                    replaced = True
-                                    break
+                                    if new_slice != matched_slice:
+                                        result_text = result_text[:match.start()] + new_slice + result_text[match.end():]
+                                        replaced = True
+                                        break
 
                         # Priority 2: Coordinate conjunction modulation ("and" -> "alongside" / "coupled with")
                         if not replaced and "and" in ngram:
-                            conj_choice = random.choice(["alongside", "coupled with", "together with"])
+                            conj_choice = "alongside" if zero_expansion else random.choice(["alongside", "coupled with", "together with"])
                             word_pat = r"\band\b"
                             new_slice = re.sub(word_pat, conj_choice, matched_slice, count=1, flags=re.IGNORECASE)
-                            result_text = result_text[:match.start()] + new_slice + result_text[match.end():]
-                            replaced = True
+                            if new_slice != matched_slice:
+                                result_text = result_text[:match.start()] + new_slice + result_text[match.end():]
+                                replaced = True
 
                         # Priority 2.5: Auxiliary verb + participle modulation ("has experienced" -> "witnessed" or "has steadily witnessed")
                         if not replaced and ngram[-1].lower() in {"has", "have"}:
@@ -333,15 +346,15 @@ class AdversarialOptimizer:
                                 part_dict = self.synonym_engine.thesaurus.get(part_word.lower(), {})
                                 part_cands = part_dict.get("academic", []) or part_dict.get("standard", [])
                                 chosen_verb = random.choice(part_cands) if part_cands else part_word
-                                rep_phrase = random.choice([chosen_verb, f"has steadily {chosen_verb}", f"has notably {chosen_verb}"])
+                                rep_phrase = chosen_verb if zero_expansion else random.choice([chosen_verb, f"has steadily {chosen_verb}", f"has notably {chosen_verb}"])
                                 has_pat = rf"\b{re.escape(ngram[-1])}\s+{re.escape(part_word)}\b"
                                 sub_res = re.sub(has_pat, rep_phrase, result_text, count=1, flags=re.IGNORECASE)
                                 if sub_res != result_text:
                                     result_text = sub_res
                                     replaced = True
 
-                        # Priority 3: Pre-verb modifier insertion (only before legitimate verbs, never inside collocations)
-                        if not replaced and n >= 4:
+                        # Priority 3: Pre-verb modifier insertion (only before legitimate verbs, never in zero_expansion)
+                        if not replaced and not zero_expansion and n >= 4:
                             known_verbs = {
                                 "suggest", "suggests", "suggested", "require", "requires", "required",
                                 "remain", "remains", "remained", "threaten", "threatens", "threatened",
@@ -371,49 +384,64 @@ class AdversarialOptimizer:
                                     and prev_w not in {"to", "of", "in", "for", "with", "on", "by", "from", "at", "the", "a", "an", "this", "that"}
                                 ):
                                     adv_qual = random.choice(["notably", "consistently", "steadily", "substantively"])
-                                    verb_pat = rf"\b{re.escape(w)}\b"
+                                    verb_pat = rf"(?<!-)\b{re.escape(w)}\b(?!-)"
                                     new_slice = re.sub(verb_pat, f"{adv_qual} {w}", matched_slice, count=1)
-                                    result_text = result_text[:match.start()] + new_slice + result_text[match.end():]
-                                    replaced = True
-                                    break
+                                    if new_slice != matched_slice:
+                                        result_text = result_text[:match.start()] + new_slice + result_text[match.end():]
+                                        replaced = True
+                                        break
 
-                        # Priority 4: Preposition & transitional boundary modulation
+                        # Priority 4: Preposition & transitional boundary modulation (grammatically safe)
                         if not replaced:
-                            prep_replacements = {
-                                "in": ["within", "across", "throughout"],
-                                "within": ["inside", "across", "in"],
-                                "on": ["regarding", "concerning", "upon"],
-                                "for": ["aimed at", "supporting", "towards"],
-                                "with": ["utilizing", "alongside", "by employing"],
-                                "by": ["through", "via", "by means of"],
-                                "from": ["originating from", "derived from"],
-                                "through": ["by way of", "via", "by means of"],
-                                "into": ["toward", "within"],
-                                "across": ["throughout", "within"],
-                                "of": ["associated with", "pertaining to"],
-                                "as": ["functioning as", "acting as"],
-                                "about": ["regarding", "concerning"],
-                                "over": ["across", "throughout"],
-                                "between": ["among", "across"],
-                                "against": ["relative to", "versus"],
-                                "to": ["in order to", "aiming to"]
-                            }
+                            if zero_expansion:
+                                prep_replacements = {
+                                    "in": ["within", "across", "throughout"],
+                                    "within": ["inside", "across", "in"],
+                                    "on": ["regarding", "concerning", "upon"],
+                                    "for": ["towards", "supporting"],
+                                    "with": ["utilizing", "alongside"],
+                                    "by": ["through", "via"],
+                                    "through": ["via"],
+                                    "into": ["toward", "within"],
+                                    "across": ["throughout", "within"],
+                                    "about": ["regarding", "concerning"],
+                                    "over": ["across", "throughout"],
+                                    "between": ["among", "across"],
+                                    "against": ["versus"],
+                                }
+                            else:
+                                prep_replacements = {
+                                    "in": ["within", "across", "throughout"],
+                                    "within": ["inside", "across", "in"],
+                                    "on": ["regarding", "concerning", "upon"],
+                                    "for": ["aimed at", "supporting", "towards"],
+                                    "with": ["utilizing", "alongside", "by employing"],
+                                    "by": ["through", "via", "by means of"],
+                                    "from": ["originating from", "derived from"],
+                                    "through": ["by way of", "via", "by means of"],
+                                    "into": ["toward", "within"],
+                                    "across": ["throughout", "within"],
+                                    "as": ["functioning as", "acting as"],
+                                    "about": ["regarding", "concerning"],
+                                    "over": ["across", "throughout"],
+                                    "between": ["among", "across"],
+                                    "against": ["relative to", "versus"],
+                                }
                             for pos, w in enumerate(ngram):
                                 w_low = w.lower()
                                 if w_low in prep_replacements:
                                     prev_w = ngram[pos - 1].lower() if pos > 0 else ""
-                                    if w_low == "to" and prev_w in {"prior", "according", "due", "in order", "close", "similar", "related", "dedicated", "committed", "response", "regard", "reference"}:
-                                        continue
-                                    if w_low == "of" and prev_w in {"department", "university", "faculty", "school", "college", "institute", "ministry", "bulk", "part", "member", "all", "none", "some", "most", "one", "two", "number"}:
+                                    if w_low == "on" and prev_w in {"based", "rely", "relies", "relied", "focus", "focuses", "focused", "depend", "depends", "depended"}:
                                         continue
                                     rep_prep = random.choice(prep_replacements[w_low])
                                     if w.istitle():
                                         rep_prep = rep_prep.capitalize()
-                                    prep_pat = rf"\b{re.escape(w)}\b"
+                                    prep_pat = rf"(?<!-)\b{re.escape(w)}\b(?!-)"
                                     new_slice = re.sub(prep_pat, rep_prep, matched_slice, count=1)
-                                    result_text = result_text[:match.start()] + new_slice + result_text[match.end():]
-                                    replaced = True
-                                    break
+                                    if new_slice != matched_slice:
+                                        result_text = result_text[:match.start()] + new_slice + result_text[match.end():]
+                                        replaced = True
+                                        break
 
                         # Priority 5: Conjunction & relative clause boundary modulation ("that", "which", "how")
                         if not replaced:
@@ -446,6 +474,8 @@ class AdversarialOptimizer:
                                     or cand_word in PROTECTED_TECHNICAL_WORDS
                                 ):
                                     continue
+                                if not re.search(rf"(?<!-)\b{re.escape(ngram[pos])}\b(?!-)", matched_slice, flags=re.IGNORECASE):
+                                    continue
                                 cand_pair1 = f"{cand_word} {ngram[pos + 1].lower()}" if pos < n - 1 else ""
                                 cand_pair2 = f"{ngram[pos - 1].lower()} {cand_word}" if pos > 0 else ""
                                 if cand_pair1 in colloc_set or cand_pair2 in colloc_set:
@@ -457,7 +487,9 @@ class AdversarialOptimizer:
                                 )
                                 candidates = [
                                     c for c in raw_candidates
-                                    if c.lower() not in set(AI_BUZZWORDS) and c.lower() not in BANNED_OBSCURE_LEMMAS
+                                    if c.lower() not in set(AI_BUZZWORDS)
+                                    and c.lower() not in BANNED_OBSCURE_LEMMAS
+                                    and (not zero_expansion or len(c.split()) == 1)
                                 ]
                                 if candidates:
                                     replacement = random.choice(candidates)
@@ -465,13 +497,46 @@ class AdversarialOptimizer:
                                         replacement = replacement.upper()
                                     elif ngram[pos].istitle():
                                         replacement = replacement.capitalize()
-                                    word_pat = rf"\b{re.escape(ngram[pos])}\b"
+                                    word_pat = rf"(?<!-)\b{re.escape(ngram[pos])}\b(?!-)"
                                     new_slice = re.sub(word_pat, replacement, matched_slice, count=1, flags=re.IGNORECASE)
-                                    result_text = result_text[:match.start()] + new_slice + result_text[match.end():]
-                                    replaced = True
-                                    break
+                                    if new_slice != matched_slice:
+                                        result_text = result_text[:match.start()] + new_slice + result_text[match.end():]
+                                        replaced = True
+                                        break
 
-                        # Priority 7: WordNet dynamic synonym replacement for content words in n-gram
+                        # Priority 7: Universal Scholarly Lexicon Replacement (Curated, grammatically safe)
+                        if not replaced:
+                            for pos in range(n):
+                                cand_word = ngram[pos].lower()
+                                if (
+                                    len(cand_word) <= 2
+                                    or cand_word in keywords_lower
+                                    or cand_word in keyword_words
+                                    or cand_word in PROTECTED_TECHNICAL_WORDS
+                                ):
+                                    continue
+                                if not re.search(rf"(?<!-)\b{re.escape(ngram[pos])}\b(?!-)", matched_slice, flags=re.IGNORECASE):
+                                    continue
+                                if cand_word in UNIVERSAL_SCHOLARLY_REPLACEMENTS:
+                                    univ_cands = [
+                                        c for c in UNIVERSAL_SCHOLARLY_REPLACEMENTS[cand_word]
+                                        if not zero_expansion or len(c.split()) == 1
+                                    ]
+                                    if not univ_cands:
+                                        continue
+                                    repl_cand = random.choice(univ_cands)
+                                    if ngram[pos].isupper() and len(ngram[pos]) > 1:
+                                        repl_cand = repl_cand.upper()
+                                    elif ngram[pos].istitle():
+                                        repl_cand = repl_cand.capitalize()
+                                    word_pat = rf"(?<!-)\b{re.escape(ngram[pos])}\b(?!-)"
+                                    new_slice = re.sub(word_pat, repl_cand, matched_slice, count=1, flags=re.IGNORECASE)
+                                    if new_slice != matched_slice:
+                                        result_text = result_text[:match.start()] + new_slice + result_text[match.end():]
+                                        replaced = True
+                                        break
+
+                        # Priority 8: POS-guarded WordNet dynamic synonym fallback (strictly after curated dictionaries)
                         if not replaced and n >= 4:
                             for pos in range(n):
                                 cand_w = ngram[pos].lower()
@@ -483,6 +548,8 @@ class AdversarialOptimizer:
                                     or cand_w in {"the", "and", "for", "with", "from", "that", "this", "these", "those", "into", "onto", "upon"}
                                 ):
                                     continue
+                                if not re.search(rf"(?<!-)\b{re.escape(ngram[pos])}\b(?!-)", matched_slice, flags=re.IGNORECASE):
+                                    continue
                                 cands = self.synonym_engine.get_wordnet_candidates(cand_w)
                                 if cands:
                                     rep = random.choice(cands)
@@ -490,37 +557,15 @@ class AdversarialOptimizer:
                                         rep = rep.upper()
                                     elif ngram[pos].istitle():
                                         rep = rep.capitalize()
-                                    word_pat = rf"\b{re.escape(ngram[pos])}\b"
+                                    word_pat = rf"(?<!-)\b{re.escape(ngram[pos])}\b(?!-)"
                                     new_slice = re.sub(word_pat, rep, matched_slice, count=1, flags=re.IGNORECASE)
-                                    result_text = result_text[:match.start()] + new_slice + result_text[match.end():]
-                                    replaced = True
-                                    break
+                                    if new_slice != matched_slice:
+                                        result_text = result_text[:match.start()] + new_slice + result_text[match.end():]
+                                        replaced = True
+                                        break
 
-                        # Priority 8: Universal Scholarly Lexicon Replacement
-                        if not replaced:
-                            for pos in range(n):
-                                cand_word = ngram[pos].lower()
-                                if (
-                                    len(cand_word) <= 2
-                                    or cand_word in keywords_lower
-                                    or cand_word in keyword_words
-                                    or cand_word in PROTECTED_TECHNICAL_WORDS
-                                ):
-                                    continue
-                                if cand_word in UNIVERSAL_SCHOLARLY_REPLACEMENTS:
-                                    repl_cand = random.choice(UNIVERSAL_SCHOLARLY_REPLACEMENTS[cand_word])
-                                    if ngram[pos].isupper() and len(ngram[pos]) > 1:
-                                        repl_cand = repl_cand.upper()
-                                    elif ngram[pos].istitle():
-                                        repl_cand = repl_cand.capitalize()
-                                    word_pat = rf"\b{re.escape(ngram[pos])}\b"
-                                    new_slice = re.sub(word_pat, repl_cand, matched_slice, count=1, flags=re.IGNORECASE)
-                                    result_text = result_text[:match.start()] + new_slice + result_text[match.end():]
-                                    replaced = True
-                                    break
-
-                        # Priority 9: Controlled Single Adverb Insertion before Verbs (Strictly no stacking adjectives!)
-                        if not replaced and n >= 4:
+                        # Priority 9: Controlled Single Adverb Insertion before Verbs (Skipped in zero_expansion)
+                        if not replaced and not zero_expansion and n >= 4:
                             for pos in range(n):
                                 cand_word = ngram[pos]
                                 cand_low = cand_word.lower()
@@ -547,13 +592,13 @@ class AdversarialOptimizer:
                                         }
                                         if cand_low in verb_syns:
                                             rep = random.choice(verb_syns[cand_low])
-                                            new_slice = re.sub(rf"\b{re.escape(cand_word)}\b", rep, matched_slice, count=1)
+                                            new_slice = re.sub(rf"(?<!-)\b{re.escape(cand_word)}\b(?!-)", rep, matched_slice, count=1)
                                             result_text = result_text[:match.start()] + new_slice + result_text[match.end():]
                                             replaced = True
                                             break
                                         else:
                                             adv = random.choice(["consistently", "steadily", "reliably", "directly"])
-                                            new_slice = re.sub(rf"\b{re.escape(cand_word)}\b", f"{adv} {cand_word}", matched_slice, count=1)
+                                            new_slice = re.sub(rf"(?<!-)\b{re.escape(cand_word)}\b(?!-)", f"{adv} {cand_word}", matched_slice, count=1)
                                             result_text = result_text[:match.start()] + new_slice + result_text[match.end():]
                                             replaced = True
                                             break

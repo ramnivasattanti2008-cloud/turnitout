@@ -57,39 +57,46 @@ class ModelTrainer:
         pass_turnitin = 0
         pass_gptzero = 0
         pass_copyleaks = 0
+        pass_winnowing = 0
 
         eval_records: List[Dict[str, Any]] = []
 
-        # 1. Grid search for optimal intensity over representative sample
-        candidate_intensities = [0.35, 0.40, 0.45, 0.50, 0.55, 0.60]
+        # 1. Grid search for optimal Beast Mode intensity over representative sample
+        candidate_intensities = [0.65, 0.75, 0.85, 0.90]
         intensity_scores: Dict[float, float] = {}
 
-        subset_for_tuning = pairs[:25] if len(pairs) >= 25 else pairs
+        subset_for_tuning = pairs[:20] if len(pairs) >= 20 else pairs
         for intensity in candidate_intensities:
-            sample_reduction = 0.0
+            sample_score = 0.0
             for item in subset_for_tuning:
                 ai_input = item.get("ai_style_input", "")
-                res = self.humanizer.process(ai_input, intensity=intensity)
-                sample_reduction += res["metrics"]["ai_reduction"]
-            intensity_scores[intensity] = sample_reduction / max(1, len(subset_for_tuning))
+                res = self.humanizer.process(ai_input, mode="beast", intensity=intensity)
+                red = res["metrics"]["ai_reduction"]
+                uniq = res["metrics"]["uniqueness_score"]
+                win_ok = 100.0 if res["metrics"].get("winnowing_matches", 0) == 0 else 0.0
+                sample_score += (red * 0.40) + (uniq * 0.45) + (win_ok * 0.15)
+            intensity_scores[intensity] = round(sample_score / max(1, len(subset_for_tuning)), 2)
 
         best_intensity = max(intensity_scores, key=intensity_scores.get)
-        logger.info(f"Calibrated optimal intensity: {best_intensity} (Candidate scores: {intensity_scores})")
+        logger.info(f"Calibrated optimal Beast intensity: {best_intensity} (Scores: {intensity_scores})")
 
         # 2. Comprehensive evaluation run across evaluation pairs
         eval_pairs = pairs[:max_eval_pairs] if len(pairs) > max_eval_pairs else pairs
-        logger.info(f"Evaluating humanization performance across {len(eval_pairs)} pairs...")
+        logger.info(f"Evaluating Beast + Winnowing humanization across {len(eval_pairs)} pairs...")
 
         for item in eval_pairs:
             ai_input = item.get("ai_style_input", "")
             human_target = item.get("human_target", "")
 
-            # Run transformation
-            res = self.humanizer.process(ai_input, intensity=best_intensity)
+            # Run Beast Mode transformation
+            res = self.humanizer.process(ai_input, mode="beast", intensity=best_intensity)
             humanized_text = res["humanized_text"]
 
             ai_reduction = res["metrics"]["ai_reduction"]
             uniqueness = res["metrics"]["uniqueness_score"]
+            win_matches = res["metrics"].get("winnowing_matches", 0)
+            if win_matches == 0:
+                pass_winnowing += 1
 
             # Overlap with target human text
             human_similarity = calculate_ngram_overlap(humanized_text, human_target, n=3)
@@ -115,6 +122,7 @@ class ModelTrainer:
                     "after_ai": res["metrics"]["ai_score_after"],
                     "ai_reduction": ai_reduction,
                     "uniqueness": uniqueness,
+                    "winnowing_matches": win_matches,
                     "human_overlap_3gram": human_similarity,
                     "turnitin_score": dets.get("turnitin", {}).get("score", 0.0),
                     "gptzero_score": dets.get("gptzero", {}).get("score", 0.0)
@@ -125,13 +133,15 @@ class ModelTrainer:
         turnitin_rate = round((pass_turnitin / max(1, total_eval_samples)) * 100.0, 1)
         gptzero_rate = round((pass_gptzero / max(1, total_eval_samples)) * 100.0, 1)
         copyleaks_rate = round((pass_copyleaks / max(1, total_eval_samples)) * 100.0, 1)
+        winnowing_rate = round((pass_winnowing / max(1, total_eval_samples)) * 100.0, 1)
 
         # Save model checkpoint and calibration weights
         calibrated_model = {
-            "model_version": "2.5.0-beast-calibrated",
+            "model_version": "2.8.0-turnitout-beast",
             "optimal_intensity": best_intensity,
             "avg_ai_reduction_pct": avg_reduction,
             "avg_uniqueness_pct": avg_uniqueness,
+            "winnowing_bypass_rate": winnowing_rate,
             "turnitin_bypass_rate": turnitin_rate,
             "gptzero_bypass_rate": gptzero_rate,
             "copyleaks_bypass_rate": copyleaks_rate,

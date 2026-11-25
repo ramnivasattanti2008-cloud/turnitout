@@ -58,8 +58,8 @@ def run_intensive_training(
     index = CorpusPlagiarismIndex.get_index(max_docs=4000)
     logger.info("Phase 3 Complete! Total Indexed 4-Grams: %d across %d documents", len(index), CorpusPlagiarismIndex._total_docs_indexed)
 
-    # Phase 4: End-to-End Validation Benchmark on Unseen AI Prompt
-    logger.info("Phase 4: Running End-to-End Verification Benchmark...")
+    # Phase 4: End-to-End Turnitout Beast Verification Benchmark
+    logger.info("Phase 4: Running End-to-End Turnitout Beast Verification Benchmark...")
     test_prompt = (
         "In today's fast-paced academic landscape, artificial intelligence plays a crucial role "
         "in higher education pedagogy. Furthermore, it is important to remember that deep learning "
@@ -68,26 +68,49 @@ def run_intensive_training(
         "stands as a testament to the power of human ingenuity."
     )
 
+    latex_prompt = (
+        r"\section{Methodology} "
+        r"Previous studies have shown that the Navier-Stokes equations describe fluid motion "
+        r"\cite{pope2000turbulent}. In order to evaluate numerical convergence, we analyzed "
+        r"the truncation error of the finite difference scheme $\Delta t \le C \Delta x^2$."
+    )
+
     humanizer = TextHumanizer()
-    analyzer = TextAnalyzer()
 
     # Benchmark Standard Mode
-    std_res = humanizer.process(test_prompt, mode="standard")
+    std_res = humanizer.process(test_prompt, mode="standard", intensity=0.75)
     std_ai = std_res["metrics"]["ai_score_after"]
     std_uniq = std_res["metrics"]["uniqueness_score"]
 
     # Benchmark Beast Mode
-    beast_res = humanizer.process(test_prompt, mode="beast")
+    beast_res = humanizer.process(test_prompt, mode="beast", intensity=0.85)
     beast_ai = beast_res["metrics"]["ai_score_after"]
     beast_uniq = beast_res["metrics"]["uniqueness_score"]
+    beast_winnow = beast_res["metrics"].get("winnowing_matches", 0)
+
+    # Benchmark Zero-Expansion Mode
+    ze_res = humanizer.process(test_prompt, mode="beast", intensity=0.80, zero_expansion=True)
+    ze_in_words = len(test_prompt.split())
+    ze_out_words = len(ze_res["humanized_text"].split())
+
+    # Benchmark LaTeX Shielding
+    latex_res = humanizer.process(latex_prompt, mode="beast", intensity=0.80)
+    latex_intact = (
+        r"\section{Methodology}" in latex_res["humanized_text"]
+        and r"\cite{pope2000turbulent}" in latex_res["humanized_text"]
+        and r"$\Delta t \le C \Delta x^2$" in latex_res["humanized_text"]
+    )
 
     elapsed = round(time.time() - start_time, 2)
     logger.info("=================================================================")
-    logger.info(f"🎉 INTENSIVE TRAINING & CALIBRATION FULLY COMPLETE in {elapsed}s!")
-    logger.info(f"Standard Mode -> AI Score: {std_ai}% | Uniqueness: {std_uniq}%")
-    logger.info(f"Beast Mode    -> AI Score: {beast_ai}% | Uniqueness: {beast_uniq}%")
-    logger.info(f"Turnitin Bypass Rate across corpus: {calibrated_weights.get('turnitin_bypass_rate')}%")
-    logger.info(f"GPTZero Bypass Rate across corpus:  {calibrated_weights.get('gptzero_bypass_rate')}%")
+    logger.info(f"INTENSIVE TRAINING & CALIBRATION FULLY COMPLETE in {elapsed}s!")
+    logger.info(f"Standard Mode      -> AI: {std_ai}% | Uniqueness: {std_uniq}%")
+    logger.info(f"Beast Mode         -> AI: {beast_ai}% | Uniqueness: {beast_uniq}% | Winnowing Hashes: {beast_winnow}")
+    logger.info(f"Zero-Expansion     -> Input Words: {ze_in_words} | Output Words: {ze_out_words} | Uniqueness: {ze_res['metrics']['uniqueness_score']}%")
+    logger.info(f"LaTeX Math Shield  -> Intact: {latex_intact}")
+    logger.info(f"Winnowing Bypass   -> {calibrated_weights.get('winnowing_bypass_rate')}%")
+    logger.info(f"Turnitin Bypass    -> {calibrated_weights.get('turnitin_bypass_rate')}%")
+    logger.info(f"GPTZero Bypass     -> {calibrated_weights.get('gptzero_bypass_rate')}%")
     logger.info("=================================================================")
 
     summary = {
@@ -99,7 +122,13 @@ def run_intensive_training(
             "standard_ai_score": std_ai,
             "standard_uniqueness": std_uniq,
             "beast_ai_score": beast_ai,
-            "beast_uniqueness": beast_uniq
+            "beast_uniqueness": beast_uniq,
+            "beast_winnowing_matches": beast_winnow,
+            "zero_expansion_in_words": ze_in_words,
+            "zero_expansion_out_words": ze_out_words,
+            "latex_shield_intact": latex_intact,
+            "beast_sample_output": beast_res["humanized_text"],
+            "latex_sample_output": latex_res["humanized_text"],
         }
     }
 
@@ -111,4 +140,4 @@ def run_intensive_training(
 
 
 if __name__ == "__main__":
-    run_intensive_training(epochs=3, neural_samples=250, eval_pairs=1000)
+    run_intensive_training(epochs=3, neural_samples=250, eval_pairs=300)

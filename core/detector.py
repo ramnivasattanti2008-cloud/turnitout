@@ -39,6 +39,7 @@ from core.metrics import (
     tokenize_words,
 )
 from core.radar import AIRadar
+from core.winnowing import WinnowingAnalyzer
 
 
 class CorpusPlagiarismIndex:
@@ -597,26 +598,27 @@ class TextAnalyzer:
         jaccard_4gram = calculate_ngram_overlap(original_text, rewritten_text, n=4)
         jaccard_5gram = calculate_ngram_overlap(original_text, rewritten_text, n=5)
         lev_similarity = levenshtein_similarity(original_text, rewritten_text)
+        winnowing_report = WinnowingAnalyzer.compare_documents(original_text, rewritten_text, k=5, w=4)
 
         # Extract matching verbatim 4-grams and 5-grams
-        words_orig = tokenize_words(original_text)
-        words_rew = tokenize_words(rewritten_text)
-
         orig_4grams = get_document_ngrams(original_text, 4)
         rew_4grams = get_document_ngrams(rewritten_text, 4)
         common_4grams = orig_4grams.intersection(rew_4grams)
 
         matching_sequences = [" ".join(g) for g in list(common_4grams)[:8]]
 
-        # Turnitin criterion: when 4-gram and 5-gram exact sequences are completely disrupted,
+        # Turnitin criterion: when 4-gram, 5-gram, and Winnowing hashes are completely disrupted,
         # verbatim plagiarism is 0.0%!
-        if jaccard_4gram == 0.0 and jaccard_5gram == 0.0:
+        if jaccard_4gram == 0.0 and jaccard_5gram == 0.0 and winnowing_report["matching_fingerprints"] == 0:
             plagiarism_risk = 0.0
             uniqueness_score = 100.0
-            plagiarism_verdict = "100% Unique (0% Verbatim Plagiarism)"
+            plagiarism_verdict = "100% Unique (0% Verbatim Plagiarism & 0 Winnowing Hashes)"
             risk_badge = "success"
         else:
-            plagiarism_risk = round((jaccard_4gram * 0.55) + (jaccard_5gram * 0.45), 1)
+            plagiarism_risk = round(max(
+                (jaccard_4gram * 0.55) + (jaccard_5gram * 0.45),
+                winnowing_report["winnowing_similarity_pct"]
+            ), 1)
             uniqueness_score = round(max(0.0, 100.0 - plagiarism_risk), 1)
             if plagiarism_risk < 15.0:
                 plagiarism_verdict = "Low Similarity (Safe for Submission)"
@@ -646,6 +648,7 @@ class TextAnalyzer:
             "ngram_4_overlap": jaccard_4gram,
             "ngram_5_overlap": jaccard_5gram,
             "levenshtein_similarity": lev_similarity,
+            "winnowing": winnowing_report,
             "matching_sequences": matching_sequences,
             "highlighted_plagiarism_html": highlighted_html
         }

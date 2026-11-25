@@ -314,7 +314,8 @@ class DocumentParser:
         intensity: float = 0.85,
         preserve_keywords: Optional[List[str]] = None,
         annotate_changes: bool = False,
-        return_annotated: bool = False
+        return_annotated: bool = False,
+        zero_expansion: bool = False
     ) -> Union[Tuple[io.BytesIO, Dict[str, Any]], Tuple[io.BytesIO, io.BytesIO, Dict[str, Any]]]:
         """
         Performs in-place, format-preserving humanization on a Word (.docx) document.
@@ -329,6 +330,9 @@ class DocumentParser:
         Otherwise returns (clean_stream, metrics_summary).
         """
         import docx
+
+        if hasattr(humanizer, "beast") and hasattr(humanizer.beast, "turnitout"):
+            humanizer.beast.turnitout.reset_state()
 
         if isinstance(docx_source, bytes):
             raw_bytes = docx_source
@@ -400,7 +404,8 @@ class DocumentParser:
                     c_desc,
                     mode=mode,
                     intensity=intensity,
-                    preserve_keywords=preserve_keywords
+                    preserve_keywords=preserve_keywords,
+                    zero_expansion=zero_expansion
                 )
                 humanized_p = f"{c_prefix}{humanized_p}"
             elif len(raw_text.split()) < 4:
@@ -414,7 +419,8 @@ class DocumentParser:
                     raw_text,
                     mode=mode,
                     intensity=intensity,
-                    preserve_keywords=preserve_keywords
+                    preserve_keywords=preserve_keywords,
+                    zero_expansion=zero_expansion
                 )
 
             all_original_paragraphs.append(raw_text)
@@ -472,7 +478,8 @@ class DocumentParser:
                                 c_desc,
                                 mode=mode,
                                 intensity=intensity,
-                                preserve_keywords=preserve_keywords
+                                preserve_keywords=preserve_keywords,
+                                zero_expansion=zero_expansion
                             )
                             hum_cell_text = f"{c_prefix}{hum_cell_text}"
                         else:
@@ -481,7 +488,8 @@ class DocumentParser:
                                 cell_text,
                                 mode=mode,
                                 intensity=intensity,
-                                preserve_keywords=preserve_keywords
+                                preserve_keywords=preserve_keywords,
+                                zero_expansion=zero_expansion
                             )
 
                         all_original_paragraphs.append(cell_text)

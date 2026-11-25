@@ -1,52 +1,41 @@
 {
-  "elapsed_seconds": 1124.61,
+  "elapsed_seconds": 226.1,
   "neural_sft": {
     "base_model": "google-t5/t5-small",
-    "samples_trained": 225,
-    "val_samples": 25,
-    "epochs": 3,
-    "total_steps": 87,
-    "final_train_loss": 0.7064,
-    "final_val_loss": 0.6205,
-    "best_val_loss": 0.6205,
-    "perplexity": 1.86,
-    "elapsed_seconds": 635.06,
+    "samples_trained": 72,
+    "val_samples": 8,
+    "epochs": 1,
+    "total_steps": 9,
+    "final_train_loss": 0.3149,
+    "final_val_loss": 0.4508,
+    "best_val_loss": 0.4508,
+    "perplexity": 1.57,
+    "elapsed_seconds": 93.36,
     "device": "cpu",
-    "threads": 8,
+    "threads": 12,
     "epoch_history": [
       {
         "epoch": 1,
-        "train_loss": 0.8746,
-        "val_loss": 0.689,
-        "perplexity": 1.99
-      },
-      {
-        "epoch": 2,
-        "train_loss": 0.7435,
-        "val_loss": 0.6362,
-        "perplexity": 1.89
-      },
-      {
-        "epoch": 3,
-        "train_loss": 0.7064,
-        "val_loss": 0.6205,
-        "perplexity": 1.86
+        "train_loss": 0.3149,
+        "val_loss": 0.4508,
+        "perplexity": 1.57
       }
     ],
-    "sample_inference_test": "Humanize: Moreover, it is important to remember that deep learning algorithms delve into massive datasets.",
-    "timestamp": "2026-10-14T10:30:29Z",
+    "sample_inference_test": "Deep learning algorithms delve into massive datasets.",
+    "timestamp": "2026-11-25T17:17:26Z",
     "status": "production_fine_tuned_ready"
   },
   "calibration": {
-    "model_version": "2.5.0-beast-calibrated",
-    "optimal_intensity": 0.4,
-    "avg_ai_reduction_pct": 79.6,
-    "avg_uniqueness_pct": 53.2,
-    "turnitin_bypass_rate": 0.3,
-    "gptzero_bypass_rate": 100.0,
-    "copyleaks_bypass_rate": 92.6,
-    "evaluated_pairs": 1000,
-    "dataset_size": 4807,
+    "model_version": "2.8.0-turnitout-beast",
+    "optimal_intensity": 0.85,
+    "avg_ai_reduction_pct": 80.9,
+    "avg_uniqueness_pct": 81.3,
+    "winnowing_bypass_rate": 17.3,
+    "turnitin_bypass_rate": 99.3,
+    "gptzero_bypass_rate": 98.0,
+    "copyleaks_bypass_rate": 100.0,
+    "evaluated_pairs": 300,
+    "dataset_size": 5773,
     "status": "calibrated_and_production_ready",
     "eval_records": [
       {
@@ -54,9 +43,10 @@
         "before_ai": 85.0,
         "after_ai": 0.0,
         "ai_reduction": 85.0,
-        "uniqueness": 62.9,
-        "human_overlap_3gram": 50.0,
-        "turnitin_score": 40.3,
+        "uniqueness": 97.4,
+        "winnowing_matches": 1,
+        "human_overlap_3gram": 7.4,
+        "turnitin_score": 0.0,
         "gptzero_score": 0.0
       },
       {
@@ -64,9 +54,10 @@
         "before_ai": 72.0,
         "after_ai": 0.0,
         "ai_reduction": 72.0,
-        "uniqueness": 51.2,
-        "human_overlap_3gram": 59.8,
-        "turnitin_score": 52.1,
+        "uniqueness": 65.5,
+        "winnowing_matches": 20,
+        "human_overlap_3gram": 36.1,
+        "turnitin_score": 0.0,
         "gptzero_score": 0.0
       },
       {
@@ -74,88 +65,102 @@
         "before_ai": 84.6,
         "after_ai": 0.0,
         "ai_reduction": 84.6,
-        "uniqueness": 61.2,
-        "human_overlap_3gram": 45.9,
-        "turnitin_score": 41.4,
-        "gptzero_score": 1.1
+        "uniqueness": 66.2,
+        "winnowing_matches": 23,
+        "human_overlap_3gram": 40.7,
+        "turnitin_score": 0.0,
+        "gptzero_score": 0.0
       },
       {
         "id": "pair_0004",
         "before_ai": 88.1,
         "after_ai": 0.0,
         "ai_reduction": 88.1,
-        "uniqueness": 68.7,
-        "human_overlap_3gram": 43.6,
-        "turnitin_score": 34.0,
-        "gptzero_score": 1.3
+        "uniqueness": 99.6,
+        "winnowing_matches": 0,
+        "human_overlap_3gram": 4.8,
+        "turnitin_score": 0.0,
+        "gptzero_score": 0.0
       },
       {
         "id": "pair_0005",
         "before_ai": 89.6,
-        "after_ai": 4.0,
-        "ai_reduction": 85.6,
-        "uniqueness": 72.8,
-        "human_overlap_3gram": 35.7,
-        "turnitin_score": 30.2,
-        "gptzero_score": 2.5
+        "after_ai": 0.0,
+        "ai_reduction": 89.6,
+        "uniqueness": 96.0,
+        "winnowing_matches": 1,
+        "human_overlap_3gram": 5.2,
+        "turnitin_score": 0.0,
+        "gptzero_score": 0.0
       },
       {
         "id": "pair_0006",
         "before_ai": 90.1,
-        "after_ai": 4.0,
-        "ai_reduction": 86.1,
-        "uniqueness": 79.8,
-        "human_overlap_3gram": 30.8,
-        "turnitin_score": 23.4,
-        "gptzero_score": 2.5
+        "after_ai": 0.0,
+        "ai_reduction": 90.1,
+        "uniqueness": 99.6,
+        "winnowing_matches": 0,
+        "human_overlap_3gram": 4.0,
+        "turnitin_score": 0.0,
+        "gptzero_score": 0.0
       },
       {
         "id": "pair_0007",
         "before_ai": 92.4,
         "after_ai": 0.0,
         "ai_reduction": 92.4,
-        "uniqueness": 68.7,
-        "human_overlap_3gram": 42.6,
-        "turnitin_score": 33.7,
+        "uniqueness": 100.0,
+        "winnowing_matches": 0,
+        "human_overlap_3gram": 4.0,
+        "turnitin_score": 0.0,
         "gptzero_score": 0.0
       },
       {
         "id": "pair_0008",
         "before_ai": 71.2,
-        "after_ai": 2.0,
-        "ai_reduction": 69.2,
-        "uniqueness": 65.1,
-        "human_overlap_3gram": 45.2,
-        "turnitin_score": 37.8,
-        "gptzero_score": 2.5
+        "after_ai": 0.0,
+        "ai_reduction": 71.2,
+        "uniqueness": 97.8,
+        "winnowing_matches": 1,
+        "human_overlap_3gram": 6.6,
+        "turnitin_score": 0.0,
+        "gptzero_score": 0.0
       },
       {
         "id": "pair_0009",
         "before_ai": 86.3,
-        "after_ai": 4.0,
-        "ai_reduction": 82.3,
-        "uniqueness": 49.4,
-        "human_overlap_3gram": 66.7,
-        "turnitin_score": 53.7,
-        "gptzero_score": 2.5
+        "after_ai": 0.0,
+        "ai_reduction": 86.3,
+        "uniqueness": 82.9,
+        "winnowing_matches": 6,
+        "human_overlap_3gram": 17.1,
+        "turnitin_score": 0.0,
+        "gptzero_score": 0.0
       },
       {
         "id": "pair_0010",
         "before_ai": 84.0,
-        "after_ai": 2.0,
-        "ai_reduction": 82.0,
-        "uniqueness": 65.5,
-        "human_overlap_3gram": 43.1,
-        "turnitin_score": 38.0,
-        "gptzero_score": 2.5
+        "after_ai": 0.0,
+        "ai_reduction": 84.0,
+        "uniqueness": 95.9,
+        "winnowing_matches": 1,
+        "human_overlap_3gram": 10.9,
+        "turnitin_score": 0.0,
+        "gptzero_score": 0.0
       }
     ]
   },
-  "corpus_index_size": 443528,
+  "corpus_index_size": 446268,
   "benchmark_results": {
-    "standard_ai_score": 4.0,
+    "standard_ai_score": 0.0,
     "standard_uniqueness": 100.0,
-    "beast_ai_score": 2.0,
-    "beast_uniqueness": 100.0
+    "beast_ai_score": 0.0,
+    "beast_uniqueness": 100.0,
+    "beast_winnowing_matches": 0,
+    "zero_expansion_in_words": 59,
+    "zero_expansion_out_words": 51,
+    "latex_shield_intact": true,
+    "beast_sample_output": "In recent years, artificial intelligence directly underpins higher education pedagogy. Beyond this, deep learning algorithms sift through copious datasets to reveal actionable systematic patterns, and as a direct outcome, handling the intricacies of algorithmic bias demands a comprehensive, layered tactic. Taking these outcomes together, machine learning, an algorithmic structural archetype deducing decision rules from empirical data, directly corroborates scholars resourcefulness.",
+    "latex_sample_output": "\\section{Methodology} prior scholarship affirms whereby the Navier-Stokes equations draw fluid motion \\cite{pope2000turbulent}, and so as to appraise numerical convergence, empirical scrutiny of the shortness mistake of the finite deviation scheme $\\Delta t \\le C \\Delta x^2$."
   }
 }
