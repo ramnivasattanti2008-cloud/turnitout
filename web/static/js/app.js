@@ -249,6 +249,16 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   textOutput.addEventListener("input", updateWordCounts);
 
+  // Keyboard shortcut: Cmd/Ctrl + Enter triggers Humanization
+  document.addEventListener("keydown", (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+      e.preventDefault();
+      if (btnHumanize && !btnHumanize.disabled) {
+        btnHumanize.click();
+      }
+    }
+  });
+
   // Slider update
   sliderIntensity.addEventListener("input", (e) => {
     labelIntensity.textContent = `${e.target.value}%`;
