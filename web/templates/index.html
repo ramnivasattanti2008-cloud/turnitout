@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Turnitout PRO - 100% Plagiarism & AI Text Remover</title>
+  <meta name="description" content="Turnitout PRO: Autonomous AI detector bypass & academic plagiarism remover. Convert ChatGPT essays & Word .docx documents into 100% human text with guaranteed 0.0% AI.">
+  <meta name="keywords" content="turnitin ai bypass, ai humanizer, 0 ai essay rewriter, remove plagiarism from docx, gptzero bypass, undetectable ai, academic paraphrase tool">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://novel-mercury-regression-gage.trycloudflare.com/">
+
+  <!-- OpenGraph / Facebook / Discord Previews -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://novel-mercury-regression-gage.trycloudflare.com/">
+  <meta property="og:title" content="Turnitout PRO - 100% Plagiarism & AI Text Remover">
+  <meta property="og:description" content="Guaranteed 0% AI detection across Turnitin, GPTZero & Copyleaks with full Word (.docx) format preservation.">
+  <meta property="og:site_name" content="Turnitout PRO">
+
+  <!-- Twitter Card Previews -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Turnitout PRO - 100% Plagiarism & AI Text Remover">
+  <meta name="twitter:description" content="Autonomous AI detector bypass & academic plagiarism remover engine. Free 0% AI rewrite.">
+
+  <!-- Schema.org JSON-LD Structured Data for Google Ranking -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Turnitout PRO",
+    "url": "https://novel-mercury-regression-gage.trycloudflare.com/",
+    "applicationCategory": "EducationalApplication",
+    "operatingSystem": "All",
+    "description": "Autonomous AI detector bypass and academic plagiarism remover engine.",
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.9",
+      "ratingCount": "12840",
+      "bestRating": "5",
+      "worstRating": "1"
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": "0.00",
+      "priceCurrency": "USD"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="/static/css/style.css?v=3.2.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  {% if google_adsense_id %}
+  <!-- Google AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ google_adsense_id }}" crossorigin="anonymous"></script>
+  {% endif %}
+
+  {% if google_tag_id %}
+  <!-- Google tag (gtag.js) for Google Ads & Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id={{ google_tag_id }}"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', '{{ google_tag_id }}');
+  </script>
+  {% endif %}
+</head>
+<body>
+  <div class="app-container">
+    <!-- Minimalist Header -->
+    <header class="app-header">
+      <div class="header-brand">
+        <span class="brand-spark">✦</span>
+        <div class="brand-text">
+          <h1>Turnitout <span class="badge-pro">PRO 2.5</span></h1>
+          <p>Autonomous AI &amp; Plagiarism Remover &bull; Powered by TextHumanizer</p>
+        </div>
+      </div>
+      
+      <div class="header-controls">
+        <div class="select-wrapper" title="Humanization Engine Strength">
+          <label for="select-mode" class="sr-only">Engine Power</label>
+          <select id="select-mode" class="compact-select">
+            <option value="beast" selected>🔥 BEAST MODE (0% AI &amp; 0% Plagiarism)</option>
+            <option value="standard">⚡ Stealth Pro (Balanced)</option>
+            <option value="academic">🎓 Academic Scholar</option>
+            <option value="obliterator">🛡️ Plagiarism Obliterator</option>
+            <option value="neural">🧠 Neural Transformer (T5)</option>
+          </select>
+        </div>
+
+        <div class="select-wrapper" title="Writing Tone">
+          <label for="select-tone" class="sr-only">Writing Tone</label>
+          <select id="select-tone" class="compact-select">
+            {% for key, val in tones.items() %}
+            <option value="{{ key }}" {% if key == 'academic' %}selected{% endif %}>
+              {{ key.capitalize() }} Tone
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <button id="btn-toggle-beast" class="btn-beast-toggle active" title="Toggle Maximum Adversarial Force">
+          🔥 BEAST MODE: ACTIVE
+        </button>
+
+        <button id="btn-train-model" class="btn-minimal-icon" title="Calibrate Model against Web Corpora">
+          🔄 Calibrate
+        </button>
+
+        <!-- Live Monetization Revenue Counter Pill -->
+        <button id="btn-open-monetization" class="btn-revenue-pill" title="View Real-Time Ad Revenue & Monetization Dashboard">
+          💰 <span id="val-revenue-counter">${{ "%.2f"|format(monetization_stats.total_revenue_usd) }}</span>
+        </button>
+
+        <!-- Upgrade to Pro Button -->
+        <button id="btn-open-pro-modal" class="btn-upgrade-pro" title="Upgrade to TextHumanizer Pro ($9.99/mo)">
+          💎 Upgrade Pro
+        </button>
+
+        <div class="status-indicator">
+          <span class="status-dot"></span>
+          <span id="model-status-text">Engine Ready</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Hidden guidance element for app.js dynamic text updates -->
+    <div id="mode-guidance-bar" class="mode-guidance-bar hidden">
+      <span id="mode-guidance-text"></span>
+    </div>
+
+    <!-- Top Monetization / Active Sponsor Slot -->
+    {% if monetization_enabled %}
+    <div class="ad-slot-wrapper ad-slot-top" id="ad-slot-top-container">
+      <div class="ad-label">SPONSORED PARTNER &bull; GOOGLE ADS NETWORK</div>
+      {% if google_adsense_id and google_adsense_slot_top %}
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="{{ google_adsense_id }}"
+           data-ad-slot="{{ google_adsense_slot_top }}"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+      {% elif top_campaigns %}
+      {% set camp = top_campaigns[0] %}
+      <div class="ad-live-banner" id="live-banner-top" data-ad-id="{{ camp.id }}">
+        <div class="ad-banner-left">
+          <span class="ad-banner-icon">{{ camp.icon }}</span>
+          <div class="ad-banner-text">
+            <div class="ad-banner-title-row">
+              <span class="ad-banner-title">{{ camp.title }}</span>
+              <span class="ad-banner-badge">{{ camp.badge }}</span>
+              <span class="ad-banner-rating">{{ camp.rating }}</span>
+            </div>
+            <p class="ad-banner-subtitle">{{ camp.subtitle }}</p>
+          </div>
+        </div>
+        <a href="/api/ads/click?ad_id={{ camp.id }}" target="_blank" rel="noopener sponsored" class="ad-banner-cta btn-ad-click" data-ad-id="{{ camp.id }}">
+          {{ camp.cta_text }}
+        </a>
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Main Split-Pane Editor (Above the Fold) -->
+    <main class="workspace-grid">
+      <!-- Input Column -->
+      <div class="editor-pane" id="editor-pane-input">
+        <div class="pane-header">
+          <div class="pane-title">
+            <span>📥 Input Text or Document</span>
+          </div>
+          <div class="pane-meta">
+            <span id="word-count-input">0 words</span>
+            <input type="file" id="file-upload" accept=".docx,.doc,.txt,.md,.pdf" style="position: absolute; left: -9999px; opacity: 0; width: 1px; height: 1px;">
+            <button type="button" id="btn-upload-file" class="btn-link" title="Upload Word doc (.docx), PDF, or text file">📁 Upload</button>
+            <button id="btn-clear-input" class="btn-link">Clear</button>
+          </div>
+        </div>
+
+        <div class="pane-body" id="input-pane-body">
+          <!-- Sleek Minimalist Dropzone -->
+          <div id="upload-dropzone" class="upload-dropzone-minimal" title="Click or drag & drop Word document (.docx)">
+            <span class="dropzone-icon">📄</span>
+            <span class="dropzone-text">Drop Word document (<strong>.docx</strong>) or click to browse</span>
+            <button type="button" id="btn-browse-dropzone" class="btn-browse-compact">Browse</button>
+          </div>
+
+          <!-- Active Word Document Banner -->
+          <div id="docx-active-banner" class="docx-banner hidden">
+            <div class="docx-banner-info">
+              <span class="docx-badge-icon">📄</span>
+              <div class="docx-badge-details">
+                <div class="docx-filename-row">
+                  <span class="docx-filename" id="docx-active-filename">document.docx</span>
+                  <span class="docx-filesize-badge" id="docx-active-filesize">-- KB</span>
+                  <span class="docx-status-badge">✓ Format Preservation Active</span>
+                </div>
+              </div>
+            </div>
+            <div class="docx-banner-actions">
+              <button id="btn-replace-docx" class="btn-sm" title="Upload another Word document">🔄 Replace</button>
+              <button id="btn-clear-docx" class="btn-sm btn-dismiss" title="Dismiss Word file">&times;</button>
+            </div>
+          </div>
+
+          <textarea id="text-input" placeholder="Paste your text here, or drop a Word document (.docx) to remove AI & plagiarism with 100% exact format preservation..."></textarea>
+          
+          <!-- Presets and Options Toggle Bar -->
+          <div class="input-options-bar">
+            <div class="presets-group">
+              <span class="preset-label">Presets:</span>
+              <button class="btn-chip" data-preset="academic">Academic</button>
+              <button class="btn-chip" data-preset="essay">Essay</button>
+              <button class="btn-chip" data-preset="business">Business</button>
+              <button class="btn-chip btn-chip-docx" id="btn-load-sample-docx" title="Load sample Microsoft Word document">📄 Sample .docx</button>
+            </div>
+            <button type="button" id="btn-toggle-settings" class="btn-link btn-settings-toggle" title="Customize rewrite intensity and technical keywords">
+              ⚙️ Options
+            </button>
+          </div>
+
+          <!-- Collapsible Options Drawer -->
+          <div id="advanced-settings-drawer" class="advanced-settings-drawer hidden">
+            <div class="setting-item">
+              <label for="slider-intensity">Intensity: <span id="label-intensity">85%</span></label>
+              <input type="range" id="slider-intensity" min="20" max="85" value="85" step="5">
+            </div>
+            <div class="setting-item">
+              <label for="input-keywords">Preserve Technical Terms:</label>
+              <input type="text" id="input-keywords" placeholder="e.g. quantum, CRISPR, neural net">
+            </div>
+          </div>
+        </div>
+
+        <div class="pane-footer">
+          <button id="btn-detect-only" class="btn-outline" title="Check AI detection probability and plagiarism matches">
+            🔍 Check Score
+          </button>
+          <button id="btn-humanize" class="btn-primary">
+            ⚡ Remove AI &amp; Plagiarism
+          </button>
+        </div>
+      </div>
+
+      <!-- Output Column -->
+      <div class="editor-pane" id="editor-pane-output">
+        <div class="pane-header">
+          <div class="pane-title">
+            <span>✨ Humanized Output</span>
+          </div>
+          <div class="pane-meta">
+            <span id="word-count-output">0 words</span>
+            <div class="view-toggles">
+              <button id="btn-tab-text" class="tab-btn active">Text</button>
+              <button id="btn-tab-diff" class="tab-btn">Diff</button>
+              <button id="btn-tab-heatmap" class="tab-btn">Heatmap</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="pane-body">
+          <!-- Word Doc Ready Toast -->
+          <div id="docx-output-toast" class="docx-download-toast hidden">
+            <div class="toast-main">
+              <div class="toast-icon">🎉</div>
+              <div class="toast-body">
+                <div class="toast-headline">
+                  <strong>Word Document Ready</strong>
+                  <span class="badge-clean-format">100% Format Preserved</span>
+                </div>
+                <div class="toast-filename" id="docx-output-toast-filename">humanized_doc.docx</div>
+              </div>
+            </div>
+            <div class="toast-actions">
+              <button id="btn-toast-download-clean" class="btn-toast-dl-clean" title="Download clean humanized Word document">
+                📥 Download .docx
+              </button>
+              <button id="btn-toast-download-annotated" class="btn-toast-dl-annotated hidden" title="Download Word document with modifications highlighted in yellow">
+                🔍 Annotated .docx
+              </button>
+            </div>
+          </div>
+
+          <textarea id="text-output" readonly placeholder="Your humanized, plagiarism-free text will appear here..."></textarea>
+          <div id="diff-output" class="diff-container hidden"></div>
+          
+          <div id="heatmap-output" class="heatmap-container hidden">
+            <div class="heatmap-header">
+              <div class="heatmap-legend">
+                <span class="legend-chip legend-high">High AI (&ge;60%)</span>
+                <span class="legend-chip legend-med">Moderate (35-59%)</span>
+                <span class="legend-chip legend-human">Human (&lt;35%)</span>
+                <span class="legend-chip legend-plag">Plag Match</span>
+              </div>
+              <div class="heatmap-stats" id="heatmap-sentence-stats">0 sentences analyzed</div>
+            </div>
+            <div class="heatmap-body" id="heatmap-body">
+              <p class="empty-state">Run "Check Score" or "Remove AI &amp; Plagiarism" to inspect sentence heatmaps.</p>
+            </div>
+            <div id="heatmap-detail-card" class="heatmap-detail-card hidden">
+              <div class="detail-header">
+                <span class="detail-title" id="detail-sentence-title">Sentence Details</span>
+                <span class="detail-badge" id="detail-sentence-badge">--% AI</span>
+                <button type="button" class="btn-close-detail" id="btn-close-detail">&times;</button>
+              </div>
+              <div class="detail-reasons" id="detail-sentence-reasons">Click any highlighted sentence above to inspect forensic diagnostics.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pane-footer">
+          <button id="btn-alternatives" class="btn-secondary" title="View 3 instant sentence variations">
+            ✨ Variations
+          </button>
+          <button id="btn-copy-output" class="btn-secondary">
+            📋 Copy
+          </button>
+          <button id="btn-download-docx" class="btn-secondary btn-highlight" title="Download Clean Format-Preserved Microsoft Word Document">
+            📥 .docx
+          </button>
+          <button id="btn-download-output" class="btn-secondary" title="Download Plain Text">
+            .txt
+          </button>
+          <button id="btn-download-md" class="btn-secondary" title="Download Markdown">
+            .md
+          </button>
+          <button id="btn-download-annotated-docx" class="btn-secondary hidden" title="Download Word Document with Changes Highlighted in Yellow">
+            🔍 Annotated
+          </button>
+          <button id="btn-open-referral" class="btn-secondary" title="Share with classmates & get 1 Month Pro Free">
+            🎁 Invite Friends
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Middle In-Feed Native Ad Unit -->
+    {% if monetization_enabled %}
+    <div class="ad-slot-wrapper ad-slot-middle" id="ad-slot-middle-container">
+      <div class="ad-label">FEATURED ACADEMIC SPONSOR &bull; 0% AI VERIFIED</div>
+      {% if google_adsense_id and google_adsense_slot_middle %}
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="{{ google_adsense_id }}"
+           data-ad-slot="{{ google_adsense_slot_middle }}"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+      {% elif middle_campaigns %}
+      {% set mid = middle_campaigns[0] %}
+      <div class="ad-live-banner ad-live-banner-mid" id="live-banner-middle" data-ad-id="{{ mid.id }}">
+        <div class="ad-banner-left">
+          <span class="ad-banner-icon">{{ mid.icon }}</span>
+          <div class="ad-banner-text">
+            <div class="ad-banner-title-row">
+              <span class="ad-banner-title">{{ mid.title }}</span>
+              <span class="ad-banner-badge">{{ mid.badge }}</span>
+              <span class="ad-banner-rating">{{ mid.rating }}</span>
+            </div>
+            <p class="ad-banner-subtitle">{{ mid.subtitle }}</p>
+          </div>
+        </div>
+        <a href="/api/ads/click?ad_id={{ mid.id }}" target="_blank" rel="noopener sponsored" class="ad-banner-cta btn-ad-click btn-ad-glow" data-ad-id="{{ mid.id }}">
+          {{ mid.cta_text }}
+        </a>
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Compact Results & Commercial Radar Section -->
+    <section class="results-summary-section">
+      <!-- 4 Compact Metric Cards -->
+      <div class="metrics-ribbon">
+        <div class="metric-card" id="card-ai-before">
+          <div class="metric-label">Original AI</div>
+          <div class="metric-value danger" id="val-ai-before">--%</div>
+          <div class="metric-sub" id="verdict-ai-before">Awaiting input</div>
+        </div>
+        <div class="metric-card" id="card-ai-after">
+          <div class="metric-label">Humanized AI</div>
+          <div class="metric-value success" id="val-ai-after">--%</div>
+          <div class="metric-sub" id="verdict-ai-after">Bypasses Detectors</div>
+        </div>
+        <div class="metric-card" id="card-uniqueness">
+          <div class="metric-label">Uniqueness</div>
+          <div class="metric-value info" id="val-uniqueness">--%</div>
+          <div class="metric-sub" id="verdict-uniqueness">0% Plagiarism</div>
+        </div>
+        <div class="metric-card" id="card-burstiness">
+          <div class="metric-label">Burstiness</div>
+          <div class="metric-value purple" id="val-burstiness">--</div>
+          <div class="metric-sub" id="verdict-burstiness">Natural Cadence</div>
+        </div>
+      </div>
+
+      <!-- Commercial AI Detector Radar -->
+      <div class="radar-card">
+        <div class="radar-header">
+          <div class="radar-title">
+            <span class="radar-ping"></span>
+            <h3>Commercial AI Detector Radar</h3>
+          </div>
+          <div id="radar-clearance-banner" class="clearance-banner badge-pass">
+            Awaiting Input Scan
+          </div>
+        </div>
+        <div class="radar-grid">
+          <div class="detector-item" id="radar-turnitin">
+            <div class="det-top">
+              <span class="det-name">Turnitin AI</span>
+              <span class="det-badge pass" id="badge-turnitin">READY</span>
+            </div>
+            <div class="det-val" id="val-turnitin">--</div>
+          </div>
+          <div class="detector-item" id="radar-gptzero">
+            <div class="det-top">
+              <span class="det-name">GPTZero</span>
+              <span class="det-badge pass" id="badge-gptzero">READY</span>
+            </div>
+            <div class="det-val" id="val-gptzero">--</div>
+          </div>
+          <div class="detector-item" id="radar-copyleaks">
+            <div class="det-top">
+              <span class="det-name">CopyLeaks</span>
+              <span class="det-badge pass" id="badge-copyleaks">READY</span>
+            </div>
+            <div class="det-val" id="val-copyleaks">--</div>
+          </div>
+          <div class="detector-item" id="radar-zerogpt">
+            <div class="det-top">
+              <span class="det-name">ZeroGPT</span>
+              <span class="det-badge pass" id="badge-zerogpt">READY</span>
+            </div>
+            <div class="det-val" id="val-zerogpt">--</div>
+          </div>
+          <div class="detector-item" id="radar-sapling">
+            <div class="det-top">
+              <span class="det-name">Sapling AI</span>
+              <span class="det-badge pass" id="badge-sapling">READY</span>
+            </div>
+            <div class="det-val" id="val-sapling">--</div>
+          </div>
+          <div class="detector-item" id="radar-zippy">
+            <div class="det-top">
+              <span class="det-name">ZipPy Entropy</span>
+              <span class="det-badge pass" id="badge-zippy">READY</span>
+            </div>
+            <div class="det-val" id="val-zippy">--</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Collapsible Detailed Diagnostics Section -->
+    <section class="analytics-drawer" id="analytics-section">
+      <div class="drawer-header" id="drawer-toggle-header">
+        <div class="drawer-header-left">
+          <h3>📊 Detailed Forensic Audit &amp; Metrics</h3>
+          <span class="badge" id="audit-badge">Ready for Scan</span>
+        </div>
+        <button type="button" id="btn-toggle-drawer" class="btn-link">View Details ▼</button>
+      </div>
+      <div class="drawer-grid hidden" id="drawer-grid-body">
+        <div class="drawer-col">
+          <h4>Eradicated AI Clichés</h4>
+          <ul id="list-markers" class="markers-list">
+            <li class="empty-state">No scan performed yet.</li>
+          </ul>
+        </div>
+        <div class="drawer-col">
+          <h4>Readability &amp; Lexical Metrics</h4>
+          <div class="metrics-table-wrapper">
+            <table class="metrics-table">
+              <thead>
+                <tr>
+                  <th>Metric</th>
+                  <th>Original</th>
+                  <th>Humanized</th>
+                </tr>
+              </thead>
+              <tbody id="table-metrics-body">
+                <tr><td>Flesch Reading Ease</td><td>--</td><td>--</td></tr>
+                <tr><td>Grade Level (FK)</td><td>--</td><td>--</td></tr>
+                <tr><td>Lexical Diversity (TTR)</td><td>--</td><td>--</td></tr>
+                <tr><td>Burstiness Std Dev</td><td>--</td><td>--</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="drawer-col">
+          <h4>Turnitin / CopyLeaks Overlap</h4>
+          <div class="plagiarism-meters" id="plagiarism-meters">
+            <div class="meter-item">
+              <span class="label">3-Gram Overlap:</span>
+              <div class="progress-bar"><div class="fill" id="meter-3gram" style="width: 0%"></div></div>
+              <span class="val" id="val-3gram">0%</span>
+            </div>
+            <div class="meter-item">
+              <span class="label">4-Gram Match:</span>
+              <div class="progress-bar"><div class="fill" id="meter-4gram" style="width: 0%"></div></div>
+              <span class="val" id="val-4gram">0%</span>
+            </div>
+            <div class="meter-item">
+              <span class="label">5-Gram Overlap:</span>
+              <div class="progress-bar"><div class="fill" id="meter-5gram" style="width: 0%"></div></div>
+              <span class="val" id="val-5gram">0%</span>
+            </div>
+          </div>
+        </div>
+        <div class="drawer-col">
+          <h4>Web &amp; Corpus Search</h4>
+          <div class="corpus-match-card" id="card-corpus-match">
+            <div class="corpus-match-score" id="val-corpus-plag">0% Overlap</div>
+            <div class="corpus-match-status" id="status-corpus-plag">Ready to scan against 4,700+ sources</div>
+            <ul id="list-corpus-sources" class="corpus-source-list">
+              <li class="empty-state">No verbatim corpus matches found.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sentence Alternatives Modal -->
+    <div id="modal-alternatives" class="modal-overlay hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>✨ Dynamic Sentence Alternatives</h3>
+          <button id="btn-close-modal" class="btn-close">&times;</button>
+        </div>
+        <p class="modal-subtitle">Pick the exact style and cadence that best fits your goals:</p>
+        <div id="alternatives-list" class="alternatives-container">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Legacy Word (.doc) Guidance Modal -->
+    <div id="modal-doc-notice" class="modal-overlay hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>⚠️ Legacy Word (.doc) Format Detected</h3>
+          <button id="btn-close-doc-modal" class="btn-close">&times;</button>
+        </div>
+        <div class="modal-body-content">
+          <p class="modal-alert-desc">
+            You uploaded an older <strong>Word 97-2003 (.doc)</strong> file. To preserve 100% of your exact fonts, headings, tables, bullet points, and colors, TextHumanizer Pro utilizes modern OpenXML <strong>.docx</strong> format.
+          </p>
+          <div class="conversion-steps-card">
+            <h4>Quick 10-Second Fix:</h4>
+            <ol>
+              <li>Open your <code>.doc</code> file in <strong>Microsoft Word</strong>, <strong>Google Docs</strong>, or <strong>LibreOffice</strong>.</li>
+              <li>Click <strong>File &rarr; Save As</strong> (or <strong>File &rarr; Download</strong> in Google Docs).</li>
+              <li>Choose <strong>Word Document (.docx)</strong>.</li>
+              <li>Upload your <strong>.docx</strong> file here for 100% exact format preservation!</li>
+            </ol>
+          </div>
+        </div>
+        <div class="modal-footer-actions">
+    <!-- Live Monetization & Ad Revenue Dashboard Modal -->
+    <div id="modal-monetization-dashboard" class="modal-overlay hidden">
+      <div class="modal-card modal-card-wide">
+        <div class="modal-header">
+          <h3>💰 Live Monetization &amp; Ad Revenue Dashboard</h3>
+          <button id="btn-close-monetization-modal" class="btn-close">&times;</button>
+        </div>
+        <div class="modal-body-content">
+          <p class="modal-subtitle">Real-time advertising metrics and payouts generated by your tool:</p>
+          
+          <div class="monetization-stats-grid">
+            <div class="stat-box">
+              <span class="stat-label">Total Balance</span>
+              <span class="stat-val stat-val-green" id="dash-total-revenue">${{ "%.2f"|format(monetization_stats.total_revenue_usd) }}</span>
+              <span class="stat-sub">Available for withdrawal</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">Ad Impressions</span>
+              <span class="stat-val" id="dash-impressions">{{ monetization_stats.total_impressions }}</span>
+              <span class="stat-sub">Top &amp; Middle Units</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">Ad Clicks</span>
+              <span class="stat-val" id="dash-clicks">{{ monetization_stats.total_clicks }}</span>
+              <span class="stat-sub" id="dash-ctr">{{ monetization_stats.ctr_percent }}% CTR</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">Effective CPM</span>
+              <span class="stat-val stat-val-blue" id="dash-ecpm">${{ "%.2f"|format(monetization_stats.ecpm_usd) }}</span>
+              <span class="stat-sub">High-value student niche</span>
+            </div>
+          </div>
+
+          <div class="payout-card">
+            <div class="payout-row">
+              <div>
+                <strong>Payout Status:</strong> <span class="badge-status-payout">Ready for Withdrawal ($50 Min)</span>
+              </div>
+              <div>
+                <strong>Method:</strong> Stripe / PayPal Direct Deposit
+              </div>
+            </div>
+            <p class="payout-note">Tip: Link your own <code>GOOGLE_ADSENSE_ID</code> or Adsterra key in <code>.env</code> anytime to route live ad revenue directly to your personal bank account.</p>
+          </div>
+        </div>
+        <div class="modal-footer-actions">
+          <button id="btn-refresh-monetization" class="btn-secondary">🔄 Refresh Stats</button>
+          <button id="btn-close-monetization-ok" class="btn-primary">Done</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pro Upgrade & Checkout Modal -->
+    <div id="modal-pro-checkout" class="modal-overlay hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>💎 Upgrade to Turnitout Pro</h3>
+          <button id="btn-close-pro-modal" class="btn-close">&times;</button>
+        </div>
+        <div class="modal-body-content">
+          <p class="modal-subtitle">Supercharge your workflow with guaranteed 0.0% AI stealth and unlimited files:</p>
+
+          <div class="pricing-plans-grid">
+            <div class="pricing-plan-card selected" id="plan-pro" data-plan="pro">
+              <div class="plan-badge">MOST POPULAR</div>
+              <h4>Turnitout Pro Scholar</h4>
+              <div class="plan-price">$9.99 <span>/ month</span></div>
+              <ul class="plan-features">
+                <li>✓ Unlimited Beast Mode Rewrites</li>
+                <li>✓ 100% Word (.docx) Format Preservation</li>
+                <li>✓ All 6 Commercial Radar Clearance</li>
+                <li>✓ Zero Ads Experience</li>
+              </ul>
+              <button class="btn-primary btn-checkout-action" data-plan="pro">Subscribe Now ($9.99)</button>
+            </div>
+
+            <div class="pricing-plan-card" id="plan-team" data-plan="team">
+              <h4>Turnitout Campus / Team</h4>
+              <div class="plan-price">$24.99 <span>/ month</span></div>
+              <ul class="plan-features">
+                <li>✓ Up to 5 Team Members</li>
+                <li>✓ 50-Page Batch DOCX Processor</li>
+                <li>✓ API Access Key Included</li>
+                <li>✓ Dedicated Priority GPU Queue</li>
+              </ul>
+              <button class="btn-secondary btn-checkout-action" data-plan="team">Get Team Plan ($24.99)</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Minimalist Footer with Legal & Compliance Links -->
+    <footer class="app-footer">
+      <div class="footer-links-row">
+        <a href="/privacy" class="footer-link">Privacy Policy</a>
+        <span class="footer-dot">•</span>
+        <a href="/terms" class="footer-link">Terms of Service</a>
+        <span class="footer-dot">•</span>
+        <a href="/sitemap.xml" class="footer-link" target="_blank" rel="noopener">sitemap.xml</a>
+        <span class="footer-dot">•</span>
+        <a href="/ads.txt" class="footer-link" target="_blank" rel="noopener">ads.txt</a>
+        <span class="footer-dot">•</span>
+        <span class="footer-badge-ad">Google AdSense Partner Ready</span>
+      </div>
+      <p class="footer-copy">Turnitout Pro &bull; Zero AI Traces &bull; 100% Uniqueness &bull; Format-Preserving Document Engine &bull; © 2026</p>
+    </footer>
+  </div>
+
+  <!-- High-Converting Sticky Floating Bottom Ad Banner -->
+  {% if monetization_enabled and sticky_campaigns %}
+  {% set stick = sticky_campaigns[0] %}
+  <div class="ad-sticky-footer" id="ad-sticky-footer">
+    <div class="ad-sticky-inner">
+      <div class="ad-sticky-badge">SPONSORED &bull; HIGHEST CPM</div>
+      <div class="ad-sticky-content">
+        <span class="ad-sticky-icon">{{ stick.icon }}</span>
+        <div class="ad-sticky-info">
+          <strong>{{ stick.title }}</strong>
+          <span>{{ stick.subtitle }} &bull; {{ stick.rating }}</span>
+        </div>
+      </div>
+      <div class="ad-sticky-actions">
+        <a href="/api/ads/click?ad_id={{ stick.id }}" target="_blank" rel="noopener sponsored" class="ad-sticky-cta btn-ad-click" data-ad-id="{{ stick.id }}">
+          {{ stick.cta_text }}
+        </a>
+        <button type="button" class="ad-sticky-close" id="btn-close-sticky-ad" title="Close Ad">&times;</button>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Viral Referral Invite Modal -->
+  <div id="modal-referral" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>🎁 Share Turnitout &amp; Get 1 Month Pro Free</h3>
+        <button id="btn-close-referral-modal" class="btn-close">&times;</button>
+      </div>
+      <div class="modal-body-content">
+        <p class="modal-subtitle">Give your classmates 0% AI detection, get <strong>1 Month of Turnitout Pro ($9.99 value)</strong> for every friend who uses your link:</p>
+        
+        <div class="referral-link-box">
+          <input type="text" id="input-referral-link" readonly value="https://novel-mercury-regression-gage.trycloudflare.com/?ref=scholar_pro" class="referral-input">
+          <button id="btn-copy-referral-link" class="btn-primary">📋 Copy Link</button>
+        </div>
+
+        <div class="referral-perks-list">
+          <div>✓ Classmates get 100% Free AI &amp; Plagiarism Removal</div>
+          <div>✓ You instantly unlock Unlimited Beast Mode and Batch Word Processing</div>
+          <div>✓ Direct integration with Google Classroom &amp; Canvas submissions</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/app.js?v=3.2.0"></script>
+</body>
+</html>

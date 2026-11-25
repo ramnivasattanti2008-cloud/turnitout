@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: text-humanizer-pro
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt && python -c "import nltk; nltk.download('punkt', quiet=True); nltk.download('punkt_tab', quiet=True); nltk.download('averaged_perceptron_tagger', quiet=True); nltk.download('wordnet', quiet=True)"
+    startCommand: gunicorn web.app:app --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.8
+      - key: MONETIZATION_ENABLED
+        value: "true"
+      - key: GOOGLE_ADSENSE_ID
+        sync: false
+      - key: GOOGLE_ADSENSE_SLOT_TOP
+        sync: false
+      - key: GOOGLE_ADSENSE_SLOT_MIDDLE
+        sync: false
+      - key: GOOGLE_TAG_ID
+        sync: false

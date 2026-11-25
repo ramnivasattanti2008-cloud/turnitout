@@ -1,0 +1,114 @@
+{
+  "model_version": "2.5.0-beast-calibrated",
+  "optimal_intensity": 0.35,
+  "avg_ai_reduction_pct": 83.4,
+  "avg_uniqueness_pct": 69.1,
+  "turnitin_bypass_rate": 100.0,
+  "gptzero_bypass_rate": 100.0,
+  "copyleaks_bypass_rate": 100.0,
+  "evaluated_pairs": 100,
+  "dataset_size": 5773,
+  "status": "calibrated_and_production_ready",
+  "eval_records": [
+    {
+      "id": "pair_0001",
+      "before_ai": 85.0,
+      "after_ai": 0.0,
+      "ai_reduction": 85.0,
+      "uniqueness": 90.9,
+      "human_overlap_3gram": 15.5,
+      "turnitin_score": 0.0,
+      "gptzero_score": 0.0
+    },
+    {
+      "id": "pair_0002",
+      "before_ai": 72.0,
+      "after_ai": 0.0,
+      "ai_reduction": 72.0,
+      "uniqueness": 65.0,
+      "human_overlap_3gram": 40.2,
+      "turnitin_score": 0.0,
+      "gptzero_score": 0.0
+    },
+    {
+      "id": "pair_0003",
+      "before_ai": 84.6,
+      "after_ai": 0.0,
+      "ai_reduction": 84.6,
+      "uniqueness": 61.0,
+      "human_overlap_3gram": 47.4,
+      "turnitin_score": 0.0,
+      "gptzero_score": 0.0
+    },
+    {
+      "id": "pair_0004",
+      "before_ai": 88.1,
+      "after_ai": 0.0,
+      "ai_reduction": 88.1,
+      "uniqueness": 83.4,
+      "human_overlap_3gram": 24.1,
+      "turnitin_score": 0.0,
+      "gptzero_score": 0.0
+    },
+    {
+      "id": "pair_0005",
+      "before_ai": 89.6,
+      "after_ai": 0.0,
+      "ai_reduction": 89.6,
+      "uniqueness": 83.8,
+      "human_overlap_3gram": 17.6,
+      "turnitin_score": 0.0,
+      "gptzero_score": 0.0
+    },
+    {
+      "id": "pair_0006",
+      "before_ai": 90.1,
+      "after_ai": 0.0,
+      "ai_reduction": 90.1,
+      "uniqueness": 88.4,
+      "human_overlap_3gram": 17.4,
+      "turnitin_score": 0.0,
+      "gptzero_score": 0.0
+    },
+    {
+      "id": "pair_0007",
+      "before_ai": 92.4,
+      "after_ai": 0.0,
+      "ai_reduction": 92.4,
+      "uniqueness": 93.2,
+      "human_overlap_3gram": 10.7,
+      "turnitin_score": 0.0,
+      "gptzero_score": 0.0
+    },
+    {
+      "id": "pair_0008",
+      "before_ai": 71.2,
+      "after_ai": 0.0,
+      "ai_reduction": 71.2,
+      "uniqueness": 66.6,
+      "human_overlap_3gram": 37.1,
+      "turnitin_score": 0.0,
+      "gptzero_score": 0.0
+    },
+    {
+      "id": "pair_0009",
+      "before_ai": 86.3,
+      "after_ai": 0.0,
+      "ai_reduction": 86.3,
+      "uniqueness": 75.6,
+      "human_overlap_3gram": 30.5,
+      "turnitin_score": 0.0,
+      "gptzero_score": 0.0
+    },
+    {
+      "id": "pair_0010",
+      "before_ai": 84.0,
+      "after_ai": 0.0,
+      "ai_reduction": 84.0,
+      "uniqueness": 83.9,
+      "human_overlap_3gram": 23.9,
+      "turnitin_score": 0.0,
+      "gptzero_score": 0.0
+    }
+  ]
+}

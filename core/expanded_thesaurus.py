@@ -1,0 +1,207 @@
+"""
+Expanded Curated Academic, Essay, and Technical Thesaurus.
+Provides high-register, human-sounding synonyms with full inflection coverage
+(base, 3rd person singular, past tense, gerund/participle, and plurals).
+Strictly avoids known AI buzzwords (like 'tapestry', 'beacon', 'imperative', 'harness')
+and unnatural archaic terms.
+"""
+
+from typing import Dict, List
+
+EXPANDED_ACADEMIC_THESAURUS: Dict[str, Dict[str, List[str]]] = {
+    "introduction": {"academic": ["overview", "foundational overview", "orientation", "survey"], "standard": ["overview", "survey", "orientation"]},
+    # --- Specialized Domain Terminology (Replacing awkward WordNet definitions) ---
+    "fraud": {"academic": ["deception", "illicit activity", "financial misconduct"], "standard": ["scam", "deception", "cheating"]},
+    "detection": {"academic": ["identification", "discovery", "recognition", "uncovering"], "standard": ["spotting", "discovery", "tracking"]},
+    "trading": {"academic": ["market transactions", "financial exchange", "algorithmic trading"], "standard": ["buying and selling", "trading", "transactions"]},
+    "autonomous": {"academic": ["self-driving", "automated", "self-operating"], "standard": ["self-driving", "driverless", "automated"]},
+    "vehicle": {"academic": ["transport system", "automobile", "transit platform"], "standard": ["car", "vehicle", "automobile"]},
+    "vehicles": {"academic": ["transport systems", "automobiles", "transit platforms"], "standard": ["cars", "vehicles", "automobiles"]},
+    "diagnosis": {"academic": ["clinical assessment", "diagnostic evaluation", "condition identification"], "standard": ["checkup", "detection", "identification"]},
+    "training": {"academic": ["model training", "instruction", "model optimization", "learning"], "standard": ["training", "preparation", "learning"]},
+    "trained": {"academic": ["optimized", "instructed", "calibrated"], "standard": ["trained", "prepared"]},
+    "train": {"academic": ["optimize", "instruct", "calibrate"], "standard": ["train", "prepare"]},
+    "object": {"academic": ["visual element", "entity", "target item", "physical entity"], "standard": ["item", "entity", "thing", "target"]},
+    "objects": {"academic": ["visual elements", "entities", "target items", "physical entities"], "standard": ["items", "entities", "things", "targets"]},
+    "recognition": {"academic": ["identification", "classification", "discernment", "detection"], "standard": ["identification", "detection", "spotting"]},
+    "automated": {"academic": ["algorithmic", "computerized", "systematic", "computational"], "standard": ["automatic", "computerized", "automated"]},
+    "automate": {"academic": ["operationalize algorithmically", "computerize", "streamline through software"], "standard": ["automate", "computerize"]},
+    "automates": {"academic": ["computerizes", "streamlines computationally", "handles algorithmically"], "standard": ["automates", "computerizes"]},
+    "automating": {"academic": ["computerizing", "streamlining algorithmically"], "standard": ["automating", "computerizing"]},
+    "automation": {"academic": ["algorithmic processing", "computational automation", "systematic processing"], "standard": ["automation", "mechanization"]},
+    "core": {"academic": ["primary", "fundamental", "central", "principal"], "standard": ["main", "key", "central"]},
+    "application": {"academic": ["use case", "practical deployment", "implementation"], "standard": ["use", "practical use", "implementation"]},
+    "applications": {"academic": ["use cases", "practical deployments", "implementations"], "standard": ["uses", "practical uses", "implementations"]},
+    "characteristic": {"academic": ["attribute", "trait", "hallmark", "feature"], "standard": ["feature", "trait", "quality"]},
+    "characteristics": {"academic": ["attributes", "traits", "hallmarks", "features"], "standard": ["features", "traits", "qualities"]},
+    "finance": {"academic": ["financial services", "financial sector", "banking and markets"], "standard": ["finance", "banking", "financial sector"]},
+    "healthcare": {"academic": ["medical sector", "clinical medicine", "healthcare domain"], "standard": ["health care", "medicine", "medical field"]},
+    "multiple": {"academic": ["numerous", "diverse", "several", "manifold"], "standard": ["many", "various", "several"]},
+
+    # --- High-Frequency Verbs ---
+    "experience": {"academic": ["undergo", "witness", "encounter", "face"], "standard": ["go through", "encounter", "face"]},
+    "experiences": {"academic": ["undergoes", "witnesses", "encounters", "faces"], "standard": ["goes through", "encounters", "faces"]},
+    "experienced": {"academic": ["undergone", "witnessed", "encountered", "seen"], "standard": ["gone through", "encountered", "seen"]},
+    "experiencing": {"academic": ["undergoing", "witnessing", "encountering"], "standard": ["going through", "encountering"]},
+
+    "revolutionize": {"academic": ["transform", "overhaul", "modernize", "reshape"], "standard": ["transform", "modernize", "remodel"]},
+    "revolutionizes": {"academic": ["transforms", "overhauls", "modernizes", "reshapes"], "standard": ["transforms", "modernizes", "remodels"]},
+    "revolutionized": {"academic": ["transformed", "overhauled", "modernized", "fundamentally changed"], "standard": ["transformed", "modernized", "reshaped"]},
+    "revolutionizing": {"academic": ["transforming", "overhauling", "modernizing", "reshaping"], "standard": ["transforming", "modernizing", "reshaping"]},
+
+    "solve": {"academic": ["resolve", "address", "tackle", "settle"], "standard": ["resolve", "fix", "work out", "settle"]},
+    "solves": {"academic": ["resolves", "addresses", "tackles", "settles"], "standard": ["resolves", "fixes", "works out", "settles"]},
+    "solved": {"academic": ["resolved", "addressed", "tackled", "settled"], "standard": ["resolved", "fixed", "worked out", "settled"]},
+    "solving": {"academic": ["resolving", "addressing", "tackling", "settling"], "standard": ["resolving", "fixing", "working out"]},
+
+    "believe": {"academic": ["maintain", "contend", "posit", "hold"], "standard": ["think", "maintain", "consider", "hold"]},
+    "believes": {"academic": ["maintains", "contends", "posits", "holds"], "standard": ["thinks", "maintains", "considers", "holds"]},
+    "believed": {"academic": ["maintained", "contended", "posited", "held"], "standard": ["thought", "maintained", "considered", "held"]},
+    "believing": {"academic": ["maintaining", "contending", "positing"], "standard": ["thinking", "maintaining", "holding"]},
+
+    "apply": {"academic": ["deploy", "utilize", "employ", "implement"], "standard": ["use", "deploy", "implement"]},
+    "applies": {"academic": ["deploys", "utilizes", "employs", "implements"], "standard": ["uses", "deploys", "implements"]},
+    "applied": {"academic": ["deployed", "utilized", "employed", "implemented"], "standard": ["used", "deployed", "implemented"]},
+    "applying": {"academic": ["deploying", "utilizing", "employing", "implementing"], "standard": ["using", "deploying", "implementing"]},
+
+    "analyze": {"academic": ["evaluate", "scrutinize", "examine", "assess"], "standard": ["evaluate", "examine", "assess", "study"]},
+    "analyzes": {"academic": ["evaluates", "scrutinizes", "examines", "assesses"], "standard": ["evaluates", "examines", "assesses", "studies"]},
+    "analyzed": {"academic": ["evaluated", "scrutinized", "examined", "assessed"], "standard": ["evaluated", "examined", "assessed", "studied"]},
+    "analyzing": {"academic": ["evaluating", "scrutinizing", "examining", "assessing"], "standard": ["evaluating", "examining", "assessing"]},
+
+    "investigate": {"academic": ["probe", "examine", "scrutinize", "explore"], "standard": ["look into", "examine", "explore", "study"]},
+    "investigates": {"academic": ["probes", "examines", "scrutinizes", "explores"], "standard": ["looks into", "examines", "explores", "studies"]},
+    "investigated": {"academic": ["probed", "examined", "scrutinized", "explored"], "standard": ["looked into", "examined", "explored", "studied"]},
+    "investigating": {"academic": ["probing", "examining", "scrutinizing", "exploring"], "standard": ["looking into", "examining", "exploring"]},
+
+    "demonstrate": {"academic": ["illustrate", "confirm", "showcase", "establish"], "standard": ["show", "illustrate", "prove", "confirm"]},
+    "demonstrates": {"academic": ["illustrates", "confirms", "showcases", "establishes"], "standard": ["shows", "illustrates", "proves", "confirms"]},
+    "demonstrated": {"academic": ["illustrated", "confirmed", "showcased", "established"], "standard": ["showed", "illustrated", "proven", "confirmed"]},
+    "demonstrating": {"academic": ["illustrating", "confirming", "showcasing", "establishing"], "standard": ["showing", "illustrating", "proving"]},
+
+    "facilitate": {"academic": ["streamline", "support", "advance", "ease"], "standard": ["help", "support", "ease", "assist"]},
+    "facilitates": {"academic": ["streamlines", "supports", "advances", "eases"], "standard": ["helps", "supports", "eases", "assists"]},
+    "facilitated": {"academic": ["streamlined", "supported", "advanced", "eased"], "standard": ["helped", "supported", "eased", "assisted"]},
+    "facilitating": {"academic": ["streamlining", "supporting", "advancing", "easing"], "standard": ["helping", "supporting", "easing"]},
+
+    "generate": {"academic": ["produce", "yield", "create", "synthesize"], "standard": ["produce", "create", "yield"]},
+    "generates": {"academic": ["produces", "yields", "creates", "synthesizes"], "standard": ["produces", "creates", "yields"]},
+    "generated": {"academic": ["produced", "yielded", "created", "synthesized"], "standard": ["produced", "created", "yielded"]},
+    "generating": {"academic": ["producing", "yielding", "creating", "synthesizing"], "standard": ["producing", "creating", "yielding"]},
+
+    "enhance": {"academic": ["strengthen", "elevate", "boost", "advance"], "standard": ["improve", "boost", "strengthen", "elevate"]},
+    "enhances": {"academic": ["strengthens", "elevates", "boosts", "advances"], "standard": ["improves", "boosts", "strengthens", "elevates"]},
+    "enhanced": {"academic": ["strengthened", "elevated", "boosted", "advanced"], "standard": ["improved", "boosted", "strengthened"]},
+    "enhancing": {"academic": ["strengthening", "elevating", "boosting", "advancing"], "standard": ["improving", "boosting", "strengthening"]},
+
+    "foster": {"academic": ["cultivate", "nurture", "encourage", "advance"], "standard": ["build", "encourage", "develop", "support"]},
+    "fosters": {"academic": ["cultivates", "nurtures", "encourages", "advances"], "standard": ["builds", "encourages", "develops", "supports"]},
+    "fostered": {"academic": ["cultivated", "nurtured", "encouraged", "advanced"], "standard": ["built", "encouraged", "developed", "supported"]},
+    "fostering": {"academic": ["cultivating", "nurturing", "encouraging", "advancing"], "standard": ["building", "encouraging", "developing"]},
+
+    "mitigate": {"academic": ["alleviate", "lessen", "curb", "moderate"], "standard": ["reduce", "lessen", "ease", "lower"]},
+    "mitigates": {"academic": ["alleviates", "lessens", "curbs", "moderates"], "standard": ["reduces", "lessens", "eases", "lowers"]},
+    "mitigated": {"academic": ["alleviated", "lessened", "curbed", "moderated"], "standard": ["reduced", "lessened", "eased", "lowered"]},
+    "mitigating": {"academic": ["alleviating", "lessening", "curbing", "moderating"], "standard": ["reducing", "lessening", "easing"]},
+
+    "transform": {"academic": ["reshape", "overhaul", "reconfigure", "remodel"], "standard": ["change", "reshape", "convert", "remodel"]},
+    "transforms": {"academic": ["reshapes", "overhauls", "reconfigures", "remodels"], "standard": ["changes", "reshapes", "converts", "remodels"]},
+    "transformed": {"academic": ["reshaped", "overhauled", "reconfigured", "remodeled"], "standard": ["changed", "reshaped", "converted"]},
+    "transforming": {"academic": ["reshaping", "overhauling", "reconfiguring", "remodeling"], "standard": ["changing", "reshaping", "converting"]},
+
+    "reshape": {"academic": ["reconfigure", "remodel", "overhaul", "transform"], "standard": ["change", "remold", "remodel"]},
+    "reshapes": {"academic": ["reconfigures", "remodels", "overhauls", "transforms"], "standard": ["changes", "remolds", "remodels"]},
+    "reshaped": {"academic": ["reconfigured", "remodeled", "overhauled", "transformed"], "standard": ["changed", "remolded", "remodeled"]},
+    "reshaping": {"academic": ["reconfiguring", "remodeling", "overhauling", "transforming"], "standard": ["changing", "remolding", "remodeling"]},
+
+    "navigate": {"academic": ["address", "manage", "handle", "negotiate"], "standard": ["work through", "handle", "manage"]},
+    "navigates": {"academic": ["addresses", "manages", "handles", "negotiates"], "standard": ["works through", "handles", "manages"]},
+    "navigated": {"academic": ["addressed", "managed", "handled", "negotiated"], "standard": ["worked through", "handled", "managed"]},
+    "navigating": {"academic": ["addressing", "managing", "handling", "negotiating"], "standard": ["working through", "handling", "managing"]},
+
+    "delve": {"academic": ["probe", "examine", "explore", "investigate"], "standard": ["look into", "explore", "examine"]},
+    "delves": {"academic": ["probes", "examines", "explores", "investigates"], "standard": ["looks into", "explores", "examines"]},
+    "delved": {"academic": ["probed", "examined", "explored", "investigated"], "standard": ["looked into", "explored", "examined"]},
+    "delving": {"academic": ["probing", "examining", "exploring", "investigating"], "standard": ["looking into", "exploring", "examining"]},
+
+    "predict": {"academic": ["forecast", "project", "estimate", "anticipate"], "standard": ["forecast", "project", "estimate"]},
+    "predicts": {"academic": ["forecasts", "projects", "estimates", "anticipates"], "standard": ["forecasts", "projects", "estimates"]},
+    "predicted": {"academic": ["forecast", "projected", "estimated", "anticipated"], "standard": ["forecast", "projected", "estimated"]},
+    "predicting": {"academic": ["forecasting", "projecting", "estimating", "anticipating"], "standard": ["forecasting", "projecting", "estimating"]},
+
+    "extract": {"academic": ["derive", "retrieve", "obtain", "isolate"], "standard": ["pull", "gather", "draw", "obtain"]},
+    "extracts": {"academic": ["derives", "retrieves", "obtains", "isolates"], "standard": ["pulls", "gathers", "draws", "obtains"]},
+    "extracted": {"academic": ["derived", "retrieved", "obtained", "isolated"], "standard": ["pulled", "gathered", "drawn", "obtained"]},
+    "extracting": {"academic": ["deriving", "retrieving", "obtaining", "isolating"], "standard": ["pulling", "gathering", "drawing"]},
+
+    "continue": {"academic": ["persist", "proceed", "sustain", "remain"], "standard": ["keep on", "persist", "go on"]},
+    "continues": {"academic": ["persists", "proceeds", "sustains", "remains"], "standard": ["keeps on", "persists", "goes on"]},
+    "continued": {"academic": ["persisted", "proceeded", "sustained", "remained"], "standard": ["kept on", "persisted", "went on"]},
+    "continuing": {"academic": ["persisting", "proceeding", "sustaining", "remaining"], "standard": ["keeping on", "persisting", "going on"]},
+
+    # --- High-Frequency Nouns ---
+    "growth": {"academic": ["expansion", "advancement", "development", "progression"], "standard": ["increase", "rise", "expansion", "growth"]},
+    "analytics": {"academic": ["data analysis", "evaluation", "data interpretation", "quantitative assessment"], "standard": ["data analysis", "reporting", "insights"]},
+    "algorithm": {"academic": ["computational procedure", "method", "model", "framework"], "standard": ["method", "procedure", "formula", "system"]},
+    "algorithms": {"academic": ["computational procedures", "methods", "models", "frameworks"], "standard": ["methods", "procedures", "formulas", "systems"]},
+    "problem": {"academic": ["challenge", "dilemma", "hurdle", "issue", "bottleneck"], "standard": ["issue", "difficulty", "trouble", "challenge"]},
+    "problems": {"academic": ["challenges", "dilemmas", "hurdles", "issues", "bottlenecks"], "standard": ["issues", "difficulties", "troubles", "challenges"]},
+    "challenge": {"academic": ["dilemma", "hurdle", "bottleneck", "obstacle"], "standard": ["difficulty", "problem", "test", "issue"]},
+    "challenges": {"academic": ["dilemmas", "hurdles", "bottlenecks", "obstacles"], "standard": ["difficulties", "problems", "tests", "issues"]},
+    "dataset": {"academic": ["data collection", "corpus", "data repository"], "standard": ["data set", "data collection", "data table"]},
+    "datasets": {"academic": ["data collections", "corpora", "data repositories"], "standard": ["data sets", "data collections", "records"]},
+    "insight": {"academic": ["finding", "observation", "pattern", "conclusion"], "standard": ["takeaway", "finding", "clue", "observation"]},
+    "insights": {"academic": ["findings", "observations", "patterns", "conclusions"], "standard": ["takeaways", "findings", "clues", "observations"]},
+    "researcher": {"academic": ["scholar", "investigator", "academic", "specialist"], "standard": ["researcher", "analyst", "scientist"]},
+    "researchers": {"academic": ["scholars", "investigators", "academics", "specialists"], "standard": ["researchers", "analysts", "scientists"]},
+    "approach": {"academic": ["strategy", "methodology", "framework", "perspective"], "standard": ["method", "way", "strategy", "plan"]},
+    "approaches": {"academic": ["strategies", "methodologies", "frameworks", "perspectives"], "standard": ["methods", "ways", "strategies", "plans"]},
+    "complexity": {"academic": ["intricacy", "challenge", "sophistication", "subtlety"], "standard": ["difficulty", "intricacy", "detail"]},
+    "complexities": {"academic": ["intricacies", "challenges", "dynamics", "subtleties"], "standard": ["difficulties", "intricacies", "details"]},
+    "field": {"academic": ["domain", "discipline", "sector", "arena"], "standard": ["area", "industry", "sector", "domain"]},
+    "fields": {"academic": ["domains", "disciplines", "sectors", "arenas"], "standard": ["areas", "industries", "sectors", "domains"]},
+    "efficiency": {"academic": ["productivity", "performance", "operational efficacy"], "standard": ["speed", "output", "performance"]},
+    "accuracy": {"academic": ["precision", "fidelity", "exactness", "reliability"], "standard": ["correctness", "exactness", "precision"]},
+    "prediction": {"academic": ["forecast", "projection", "estimation"], "standard": ["forecast", "guess", "projection"]},
+    "predictions": {"academic": ["forecasts", "projections", "estimations"], "standard": ["forecasts", "guesses", "projections"]},
+    "benefit": {"academic": ["advantage", "strength", "merit", "asset"], "standard": ["plus", "advantage", "gain", "perk"]},
+    "benefits": {"academic": ["advantages", "strengths", "merits", "assets"], "standard": ["pluses", "advantages", "gains", "perks"]},
+    "landscape": {"academic": ["environment", "arena", "space", "milieu"], "standard": ["scene", "environment", "field"]},
+    "testament": {"academic": ["tangible proof", "clear reflection", "direct evidence", "validation"], "standard": ["proof", "sign", "reflection", "evidence"]},
+    "ingenuity": {"academic": ["inventiveness", "resourcefulness", "creativity"], "standard": ["creativity", "cleverness", "inventiveness"]},
+    "transformation": {"academic": ["metamorphosis", "evolution", "overhaul", "reconfiguration"], "standard": ["change", "shift", "overhaul"]},
+    "transformations": {"academic": ["evolutions", "overhauls", "reconfigurations", "shifts"], "standard": ["changes", "shifts", "overhauls"]},
+    "diagnosis": {"academic": ["detection", "clinical assessment", "identification"], "standard": ["detection", "check", "identification"]},
+    "recognition": {"academic": ["identification", "discernment", "classification"], "standard": ["identification", "spotting", "detection"]},
+    "infrastructure": {"academic": ["architecture", "systems foundation", "framework"], "standard": ["foundation", "setup", "network", "system"]},
+
+    # --- High-Frequency Adjectives ---
+    "unprecedented": {"academic": ["extraordinary", "remarkable", "historic", "unmatched", "exceptional"], "standard": ["record", "unseen", "remarkable"]},
+    "complex": {"academic": ["intricate", "multifaceted", "sophisticated", "layered"], "standard": ["complicated", "tangled", "tricky"]},
+    "valuable": {"academic": ["meaningful", "actionable", "substantive", "useful"], "standard": ["useful", "helpful", "important"]},
+    "capable": {"academic": ["equipped", "suited", "able", "competent"], "standard": ["able", "ready", "fit"]},
+    "multifaceted": {"academic": ["comprehensive", "layered", "versatile", "integrated"], "standard": ["broad", "wide-ranging", "varied"]},
+    "rapid": {"academic": ["swift", "accelerated", "expeditious", "fast-paced"], "standard": ["quick", "fast", "speedy"]},
+    "accurate": {"academic": ["precise", "exact", "rigorous", "reliable"], "standard": ["correct", "exact", "true", "accurate"]},
+    "scalable": {"academic": ["elastic", "adaptable", "expandable"], "standard": ["flexible", "expandable", "scalable"]},
+    "massive": {"academic": ["extensive", "large-scale", "broad", "vast"], "standard": ["huge", "giant", "vast", "enormous"]},
+    "modern": {"academic": ["contemporary", "current", "present-day"], "standard": ["current", "today's", "recent"]},
+    "crucial": {"academic": ["essential", "vital", "pivotal", "fundamental"], "standard": ["key", "needed", "important", "major"]},
+    "vital": {"academic": ["essential", "crucial", "fundamental", "indispensable"], "standard": ["key", "major", "important"]},
+    "essential": {"academic": ["crucial", "vital", "fundamental", "indispensable"], "standard": ["needed", "required", "basic", "must-have"]},
+    "fundamental": {"academic": ["core", "central", "foundational", "primary"], "standard": ["basic", "core", "main", "primary"]},
+    "significant": {"academic": ["substantial", "notable", "meaningful", "marked"], "standard": ["major", "big", "notable", "important"]},
+    "substantial": {"academic": ["significant", "considerable", "marked", "notable"], "standard": ["sizable", "large", "considerable"]},
+    "comprehensive": {"academic": ["exhaustive", "broad-scale", "in-depth", "thorough"], "standard": ["complete", "full", "wide-ranging"]},
+    "extensive": {"academic": ["broad", "wide-ranging", "vast", "far-reaching"], "standard": ["wide", "broad", "large"]},
+
+    # --- High-Frequency Adverbs ---
+    "rapidly": {"academic": ["swiftly", "at an accelerated rate", "expeditiously"], "standard": ["quickly", "fast", "speedily"]},
+    "accurately": {"academic": ["precisely", "with high fidelity", "exactly", "reliably"], "standard": ["correctly", "exactness", "truly"]},
+    "significantly": {"academic": ["substantially", "notably", "markedly", "measurably"], "standard": ["greatly", "much", "notably"]},
+    "effectively": {"academic": ["successfully", "with efficacy", "productively", "reliably"], "standard": ["well", "successfully", "duly"]},
+    "substantially": {"academic": ["significantly", "considerably", "markedly"], "standard": ["largely", "greatly", "considerably"]},
+    "extensively": {"academic": ["broadly", "widely", "comprehensively"], "standard": ["widely", "broadly", "greatly"]},
+    "fundamentally": {"academic": ["at its core", "essentially", "centrally", "primarily"], "standard": ["basically", "at core", "deeply"]},
+    "consistently": {"academic": ["steadily", "reliably", "systematically", "invariably"], "standard": ["regularly", "dependably", "steadily"]},
+}
