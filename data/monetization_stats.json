@@ -1,12 +1,12 @@
 {
-  "total_impressions": 1486,
+  "total_impressions": 1489,
   "total_clicks": 70,
   "ecpm_usd": 15.8,
-  "estimated_earnings_usd": 75.98,
+  "estimated_earnings_usd": 76.03,
   "pro_subscriptions_sold": 3,
   "pro_subscription_revenue_usd": 29.97,
-  "total_revenue_usd": 105.95,
-  "last_updated": 1795370423.970739,
+  "total_revenue_usd": 106.0,
+  "last_updated": 1795604965.2662776,
   "payout_status": "Ready for Withdrawal ($50 Min)",
   "payout_method": "Stripe / PayPal"
 }
