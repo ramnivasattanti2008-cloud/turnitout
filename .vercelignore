@@ -1,0 +1,27 @@
+# Heavy binaries & large offline model weights
+cloudflared.exe
+model/fine_tuned_t5/model.safetensors
+
+# Offline training data & web crawler
+data/paired_humanize_dataset.json
+data/crawled/
+crawler/
+train_deep.py
+run_workflow.py
+benchmark.py
+
+# Offline test suites & batch docs
+tests/
+test_batch_docs/
+scripts/
+reference_turnitout/
+
+# Environments & Git
+.git
+.venv
+venv
+__pycache__
+*.pyc
+*.log
+.env
+.env.local
